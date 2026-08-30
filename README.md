@@ -2,7 +2,7 @@
 
 Uangara is a personal finance application designed to show where a user's money is held and how it moves between those locations. It treats bank accounts, e-wallets, cash, and custom user-defined wallets as real financial locations rather than reducing everything to income and expense categories.
 
-> **Status:** Phase 1 complete. The React application shell, routing, quality toolchain, Supabase client boundary, and installable PWA foundation are implemented. Authentication, database schema, and financial features are not implemented yet.
+> **Status:** Phase 2 authentication and profile-security foundations are implemented and remotely verified against the Uangara development project. Live browser/email-confirmation acceptance remains manual. Financial features are not implemented.
 
 ## The problem
 
@@ -48,14 +48,16 @@ The browser application uses `@supabase/supabase-js` as its client foundation. A
 The repository now includes:
 
 - a strict TypeScript React application built with Vite
-- a minimal mobile-first shell with home and not-found routes
+- a minimal mobile-first shell with public, guest-only, protected, and not-found routes
 - Tailwind CSS through its current Vite integration
-- a lazy Supabase browser-client factory with validated public configuration
-- Vitest and React Testing Library foundation tests
+- a validated Supabase browser client and React auth boundary
+- email/password sign-up, sign-in, sign-out, session restoration, and email-confirmation feedback
+- a versioned minimal `profiles` migration with owner-scoped RLS and least-privilege grants
+- Vitest and React Testing Library auth/foundation tests plus static migration checks
 - ESLint and Prettier configuration
 - a generated web app manifest and service worker that precaches reviewed static shell assets only
 
-The shell intentionally contains no authentication flow, wallet management, transactions, transfers, categories, reports, or financial data.
+The application intentionally contains no wallet management, transactions, transfers, categories, reports, or financial schema.
 
 ## Local development
 
@@ -66,7 +68,7 @@ npm install
 npm run dev
 ```
 
-The Phase 1 shell does not contact Supabase. Before a later authorized phase uses the client, copy `.env.example` to `.env` and replace its placeholders with a Supabase project URL and browser-safe publishable key. Never place a secret key, service-role key, or database password in a `VITE_*` variable.
+Copy `.env.example` to `.env` and replace its placeholders with a Supabase project URL and browser-safe publishable key. Authentication requires these values. Never place a secret key, service-role key, or database password in a `VITE_*` variable.
 
 Available quality commands:
 
@@ -78,6 +80,17 @@ npm run test
 npm run build
 npm run preview
 ```
+
+The Supabase CLI configuration, migrations, and database tests live under `supabase/`. With Docker running, use:
+
+```sh
+npm run supabase:start
+npm run db:reset
+npm run db:test
+npm run supabase:stop
+```
+
+The committed profile migration is the schema source of truth. Phase 2 keeps a matching TypeScript database type in `src/types/database.ts`; later schema work should adopt a reviewed reproducible generation workflow before the model expands.
 
 ## Architecture direction
 

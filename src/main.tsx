@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client'
 
 import { App } from './app/App'
 import { registerServiceWorker } from './app/pwa/register-service-worker'
+import { ConfigurationErrorPage } from './features/auth/components/ConfigurationErrorPage'
+import { getDefaultAuthService } from './features/auth/services/auth-service'
 import './styles.css'
 
 const rootElement = document.getElementById('root')
@@ -15,8 +17,20 @@ if (!rootElement) {
 
 registerServiceWorker()
 
-createRoot(rootElement).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+const root = createRoot(rootElement)
+
+try {
+  const authService = getDefaultAuthService()
+
+  root.render(
+    <StrictMode>
+      <App authService={authService} />
+    </StrictMode>,
+  )
+} catch {
+  root.render(
+    <StrictMode>
+      <ConfigurationErrorPage />
+    </StrictMode>,
+  )
+}

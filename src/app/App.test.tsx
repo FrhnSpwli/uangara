@@ -4,11 +4,13 @@ import { describe, expect, it } from 'vitest'
 
 import { App } from './App'
 import { AppRoutes } from './router/AppRouter'
+import { createAuthServiceStub } from '../test/auth'
 
 describe('Uangara application foundation', () => {
   it('boots with the application shell', () => {
+    const { service } = createAuthServiceStub()
     window.history.pushState({}, '', '/')
-    render(<App />)
+    render(<App authService={service} />)
 
     expect(
       screen.getByRole('navigation', { name: 'Primary navigation' }),
@@ -30,7 +32,9 @@ describe('Uangara application foundation', () => {
         name: 'See where your money lives and how it moves.',
       }),
     ).toBeInTheDocument()
-    expect(screen.getByText(/not available yet/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(/remain intentionally unavailable/i),
+    ).toBeInTheDocument()
   })
 
   it('renders the not-found route for an unknown location', () => {

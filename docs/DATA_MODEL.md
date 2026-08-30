@@ -2,7 +2,7 @@
 
 ## Status and intent
 
-This is a conceptual model for future schema design. It is not a migration specification, and no tables have been created. Field names, types, constraints, and deletion behavior must be resolved in the phase that implements them.
+This document is primarily the conceptual model for future financial schema design. Phase 2 implements only the minimal `profiles` foundation described below; no financial tables exist. Financial field names, types, constraints, and deletion behavior remain unresolved until their authorized phases.
 
 ## Relationship overview
 
@@ -30,14 +30,13 @@ Every user-owned row should carry or inherit an unambiguous ownership relationsh
 
 Purpose: application-specific data associated one-to-one with a Supabase Auth user.
 
-Conceptual fields:
+Implemented Phase 2 fields:
 
-- user identifier matching `auth.users.id`
-- optional display preferences
-- locale, timezone, or currency preference if approved for MVP
-- created and updated timestamps
+- `id`: primary key and foreign key to `auth.users.id`, with intentional cascading deletion
+- `display_name`: optional trimmed non-empty text, limited to 80 characters
+- `created_at` and `updated_at`: database-managed timestamps
 
-A profile must not become an alternate authentication source.
+A reviewed `auth.users` trigger creates the profile in the same database operation as the user. The trigger function is security-definer with an empty search path and restricted execution grants. Authenticated clients retain an owner-scoped insert path for safe recovery, but RLS requires `auth.uid() = id`. Clients may read their own row and update only `display_name`; they cannot reassign ownership or write timestamps. A profile is not an alternate authentication source and contains no credentials, currency, wallet, or financial fields.
 
 ### `wallets`
 
@@ -133,7 +132,7 @@ The second approach may improve audit consistency; the first may be simpler. Whi
 
 User-created categories should be owner-scoped. Default categories could be copied into each user's ownership or exposed as immutable system records alongside user records. The choice affects RLS, customization, localization, and deletion behavior and must be settled before category implementation.
 
-## Open Questions Before Database Implementation
+## Open Questions Before Financial Database Implementation
 
 - What integer or exact numeric unit will store Indonesian rupiah, and what future currency assumptions are allowed?
 - Will the MVP be explicitly single-currency, and where is that currency recorded?
@@ -148,4 +147,3 @@ User-created categories should be owner-scoped. Default categories could be copi
 - How are default categories owned, localized, and customized?
 - Should direct inserts into financial tables be denied in favor of narrowly scoped RPC functions?
 - What idempotency and concurrency controls are required for critical writes?
-
