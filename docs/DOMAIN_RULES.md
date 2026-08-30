@@ -6,6 +6,10 @@ These rules define Uangara's financial meaning independently of UI or schema cho
 
 A wallet represents a real or conceptual location where one user holds money, such as a bank account, e-wallet, cash, or a custom location. A wallet belongs to one user. Institution-specific wallet names and types must remain user-configurable rather than being the only allowed values.
 
+## Monetary values
+
+Persisted financial amounts use integer representation, not floating-point values. For the initial Indonesian Rupiah-oriented product, calculations must preserve integer arithmetic at the financial data boundary. Multi-currency behavior has not been designed, and application formatting and presentation belong to later implementation phases.
+
 ## Income
 
 Income is an external inflow that increases the user's total wealth. It produces a positive movement in the receiving wallet.
@@ -62,15 +66,23 @@ A wallet movement is a signed amount affecting exactly one wallet as part of a f
 
 A transaction may produce one or more movements. Movement records exist so balances and transfer integrity can be derived consistently rather than maintained only by mutable wallet totals.
 
+## Opening balance
+
+Opening balance is represented by a special ledger transaction with type `opening_balance`. That transaction produces a wallet movement whose signed integer amount contributes to the wallet balance like every other movement.
+
+Opening balance must not also exist as a mutable `wallet.balance` source of truth or as a separately added balance field. Any future opening-balance edit follows the transaction edit rules below and updates its movement consistently.
+
 ## Balance invariant
 
 Conceptually, at any point in time:
 
 ```text
-wallet balance = opening balance + SUM(wallet movements)
+wallet balance = SUM(wallet movements from active transactions)
 ```
 
-The implementation must choose one non-duplicative representation for opening balance. If opening balance is itself recorded as a movement, it must not also be added from a wallet field. Cached or materialized balances may be considered later for performance, but the ledger remains the source from which they can be verified or rebuilt.
+The sum includes the movement produced by the wallet's `opening_balance` transaction. Soft-deleted transactions are not active and their movements must be excluded from active balance and reporting calculations. Cached or materialized balances may be considered later for performance, but the ledger remains the source from which they can be verified or rebuilt.
+
+A calculated wallet balance is allowed to become negative. Future validation must not reject an otherwise valid operation solely because it produces a negative balance unless this rule is explicitly revised.
 
 Across all of a user's wallets:
 
@@ -94,28 +106,34 @@ Financial records must remain internally consistent throughout their lifecycle.
 
 ### Edit
 
+- The MVP uses direct update semantics for transaction edits.
 - Revalidate ownership and the complete resulting financial shape.
-- Replace or adjust all affected movements atomically with the transaction update.
+- Directly update the transaction and replace or adjust all affected movements atomically.
 - Do not permit a temporary or final state in which only one side of a transfer reflects the edit.
-- Define audit-history expectations before edit behavior is implemented.
+- Do not leave orphaned or partially updated movements.
 
-### Delete or reversal
+### Delete
 
-- Never delete or reverse only one movement of a multi-movement event.
-- Apply transaction and movement changes atomically.
-- Decide before implementation whether user-facing deletion is hard deletion, soft deletion, or an explicit reversal event.
-- Preserve reporting and audit consistency under the selected policy.
+- The MVP uses soft deletion for transactions rather than physical deletion.
+- A nullable `deleted_at` timestamp is the intended schema direction, subject to final migration review.
+- Keep the transaction and its movements recoverable at the data layer.
+- Exclude soft-deleted transactions and their movements from active balances and reports.
+- Apply any delete or restore state change consistently and atomically; never hide only one movement of a multi-movement event.
+
+## Time semantics
+
+- `occurred_at` records when the financial event actually occurred.
+- `created_at` records when the database row was created.
+- `updated_at` records when the database row was last modified.
+
+Financial ordering and reporting primarily use `occurred_at`. `created_at` must not be overloaded as occurrence time. A deterministic secondary ordering for events with the same occurrence time will be selected when the transaction schema is implemented.
 
 ## Risks future phases must resolve
 
-- rounding, numeric units, maximum amounts, and any future currency behavior
-- overdraft or negative-balance policy
-- opening-balance representation and edit behavior
+- maximum amounts and any future currency behavior
 - exact fee linkage and categorization
-- timestamp semantics and ordering of backdated transactions
-- mutation/audit policy for edits and deletions
+- deterministic secondary ordering for equal `occurred_at` values
 - database enforcement of valid movement count, signs, ownership, and transfer balance
 - concurrent writes and idempotency for RPC operations
 
 These are open design decisions, not permission to weaken the invariants above.
-

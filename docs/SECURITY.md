@@ -19,6 +19,8 @@ Supabase Auth is the intended identity provider. The application must handle sig
 - RLS must be tested with at least two distinct user identities and unauthenticated access where applicable.
 - Tables must not become exposed between migration steps; enable secure policies as part of the same reviewed migration sequence.
 
+The Phase 2 `profiles` migration applies this baseline with an `auth.users.id` ownership key, RLS enabled in the creating migration, explicit owner-only select/insert/update policies, no client delete permission, and column-level write grants. A restricted database trigger creates new profiles; route guards remain only a frontend navigation boundary. These controls require integration verification against a running Supabase-compatible database before Phase 2 is fully accepted.
+
 ## Credentials and secrets
 
 The Supabase project URL and browser publishable/anon key are expected frontend configuration, not authorization substitutes. RLS must make use of them safe. Service-role keys, database passwords, signing secrets, and privileged credentials must never be included in frontend bundles, committed environment files, client-visible logs, or browser tests.
@@ -65,4 +67,3 @@ The service worker may cache versioned static assets required for installability
 ## Security verification baseline
 
 Relevant phases must verify unauthenticated denial, same-user access, cross-user denial, invalid reference rejection, atomic rollback, credential hygiene, and production-bundle configuration. Exact tests belong in the implementing phase and their results must be reported truthfully.
-

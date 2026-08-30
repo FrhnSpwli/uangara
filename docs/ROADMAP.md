@@ -32,21 +32,21 @@ Detailed plan: [Phase 2](phases/PHASE_02_AUTH_SECURITY.md)
 ## Phase 3 — Wallet Management
 
 - **Objective:** Let users model the locations where they hold money.
-- **Major deliverables:** Resolved wallet/opening-balance schema, migrations and RLS, wallet create/read/update/archive flows, and balance foundations.
+- **Major deliverables:** Wallet schema implementing the locked opening-balance ledger semantics, migrations and RLS, wallet create/read/update/archive flows, and balance foundations.
 - **Dependencies:** Phase 2 and resolution of relevant data-model questions.
 - **Definition of done:** Users can securely manage only their own custom wallets and opening positions without compromising ledger semantics.
 
 ## Phase 4 — Income & Expense Transactions
 
 - **Objective:** Record wealth-changing transactions against wallets.
-- **Major deliverables:** Transaction and movement schema, validated atomic writes, income/expense UI, and balance derivation.
-- **Dependencies:** Phase 3 and final amount/time/category decisions needed for scope.
+- **Major deliverables:** Transaction and movement schema implementing integer amounts and the locked lifecycle/time semantics, validated atomic writes, income/expense UI, and balance derivation.
+- **Dependencies:** Phase 3 and the remaining category and transaction-shape decisions needed for scope.
 - **Definition of done:** Valid income and expense events produce correct movements and balances, with ownership and rollback tests passing.
 
 ## Phase 5 — Wallet-to-Wallet Transfers
 
 - **Objective:** Implement first-class, wealth-neutral internal transfers with optional wealth-decreasing fees.
-- **Major deliverables:** Transfer RPC and validation, source/destination UI, fee treatment, edit/reversal policy, and integrity tests.
+- **Major deliverables:** Transfer RPC and validation, source/destination UI, fee treatment, atomic direct-edit and soft-delete behavior, and integrity tests.
 - **Dependencies:** Phase 4 and explicit resolution of fee and mutation design.
 - **Definition of done:** Transfer principal is atomic and sums to zero; fees alone reduce wealth and report as expense.
 
@@ -98,4 +98,3 @@ Detailed plan: [Phase 2](phases/PHASE_02_AUTH_SECURITY.md)
 - **Major deliverables:** End-to-end acceptance, production configuration, deployment and migration runbook, monitoring baseline, backup/recovery confirmation, and release notes.
 - **Dependencies:** Phase 11 and a selected deployment environment.
 - **Definition of done:** All MVP acceptance criteria pass in the target environment and operational ownership is documented.
-

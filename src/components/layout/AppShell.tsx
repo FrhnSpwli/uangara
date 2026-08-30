@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router'
+import { Link, NavLink, Outlet } from 'react-router'
 
 const navigationLinkClassName = ({ isActive }: { isActive: boolean }) =>
   [
@@ -36,10 +36,19 @@ export function AppShell() {
             </span>
           </NavLink>
 
-          <nav aria-label="Primary navigation">
+          <nav
+            aria-label="Primary navigation"
+            className="flex items-center gap-1"
+          >
             <NavLink className={navigationLinkClassName} end to="/">
               Home
             </NavLink>
+            <Link
+              className="bg-brand-700 hover:bg-brand-800 rounded-full px-3 py-2 text-sm font-semibold text-white transition-colors"
+              to="/auth/sign-in"
+            >
+              Sign in
+            </Link>
           </nav>
         </div>
       </header>
@@ -50,7 +59,7 @@ export function AppShell() {
 
       <footer className="border-t border-slate-200 bg-white">
         <div className="mx-auto w-full max-w-5xl px-4 py-5 text-sm text-slate-500 sm:px-6">
-          Phase 1 foundation · Financial features are intentionally not
+          Authentication foundation · Financial features are intentionally not
           implemented yet.
         </div>
       </footer>

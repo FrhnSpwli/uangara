@@ -2,7 +2,9 @@
 
 ## Status
 
-Planned only. Do not implement this phase unless the user explicitly requests Phase 2. Wallet functionality is not part of this phase.
+`PHASE 2 ACCEPTANCE CRITERIA SATISFIED`
+
+Phase 2 is implemented, remotely verified, manually accepted, and closed on `phase-02-auth-security`. Phase 3 has not started.
 
 ## Objective
 
@@ -97,12 +99,43 @@ The implementing agent must run and report the exact results of formatting, lint
 
 ## Completion checklist
 
-- [ ] Auth journeys and session lifecycle implemented
-- [ ] Protected and guest route behavior verified
-- [ ] Profile migration and creation pathway implemented
-- [ ] RLS, grants, and ownership tests pass
-- [ ] Loading and safe error states verified
-- [ ] Secret and production-bundle checks pass
-- [ ] Quality checks and build pass
-- [ ] Documentation updated
-- [ ] Absence of wallet functionality confirmed
+- [x] Auth journeys and session lifecycle implemented
+- [x] Protected and guest route behavior verified with component tests
+- [x] Profile migration and creation pathway implemented
+- [x] RLS, grants, and ownership tests pass against a running database
+- [x] Loading and safe error states verified with component tests
+- [x] Secret and production-bundle checks pass
+- [x] Quality checks and build pass
+- [x] Documentation updated
+- [x] Absence of wallet functionality confirmed
+
+## Implementation record
+
+- Authentication is isolated behind a typed service and React provider. The provider subscribes once per lifecycle, cleans up the Supabase listener, and distinguishes restoration from an unauthenticated state.
+- `/auth/sign-in` and `/auth/sign-up` are guest routes; `/app` is protected. Route guards provide navigation behavior only and do not replace RLS.
+- Sign-up supports Supabase projects with email confirmation enabled: a null signup session produces a confirmation-required success state rather than an error.
+- Migration `20260830000000_create_profiles.sql` creates only `profiles`, its timestamp/new-user triggers, grants, and owner policies. Profile creation uses an `auth.users` trigger to preserve one-to-one integrity without a browser service-role key.
+- The local Supabase configuration enables email confirmation and permits Vite development/preview redirect origins. Production redirect and email settings remain deployment work.
+- `supabase/tests/profiles_rls.test.sql` defines focused anonymous, owner, cross-user, ownership-change, and deletion tests. It installs pgTAP inside its transaction, collects all TAP results, and rolls back the extension, test identities, profiles, and mutations.
+
+## Verification record
+
+On 2026-08-30:
+
+- `npm run typecheck`: passed.
+- `npm run lint`: passed with zero warnings.
+- `npm run format:check`: passed.
+- `npm run test`: passed, 4 files and 19 tests.
+- `npm run build`: passed; the PWA plugin generated the manifest and service worker and precached 12 static entries.
+- The Supabase CLI authenticated successfully, and the project derived from the configured public URL matched exactly one project in the authenticated account. The local link was verified against that project without recording credentials in the repository.
+- The initial remote migration history contained no remote versions and exactly one pending local migration. `supabase db push --dry-run` listed only `20260830000000_create_profiles.sql`, with no seeds, roles, or later-phase artifacts.
+- `supabase db push --linked` applied the Phase 2 migration successfully. A subsequent migration listing showed local and remote version `20260830000000` in agreement.
+- `supabase db lint --linked --level error`: passed with no schema errors.
+- `supabase test db --linked` could not launch its Docker-based pgTAP runner because Docker Desktop remained unavailable. The unchanged SQL assertions were therefore executed through the CLI's supported Management API query path: `supabase db query --linked --file supabase/tests/profiles_rls.test.sql`.
+- Remote pgTAP result: 26 of 26 assertions passed. The suite verified trigger-created profiles, RLS enablement, grants, anonymous denial, owner access, cross-user denial, immutable ownership/timestamps, owner recovery insert, and no client delete.
+- A separate catalog query confirmed that the auth trigger is attached, the profile function is security-definer with a pinned search path, RLS is enabled, and exactly three profile policies exist.
+- A post-test query confirmed that the rollback retained zero test users and zero test profiles.
+- Manual acceptance confirmed that an authenticated session persists after browser refresh and protected `/app` remains accessible after refresh.
+- Manual acceptance confirmed that the confirmed user has exactly one corresponding `public.profiles` row.
+- Manual acceptance confirmed successful sign-out and redirect to the sign-in flow when `/app` is accessed afterward.
+- Based on the automated, remote database, and manual results above, all Phase 2 acceptance criteria are satisfied.

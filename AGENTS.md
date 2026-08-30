@@ -29,7 +29,7 @@ The user's current explicit request overrides repository documentation. A phase 
 - Enable and test RLS for every table containing user-owned financial data. A user may access only records they own or are explicitly authorized to access.
 - Never expose Supabase service-role credentials or other privileged secrets in frontend code, logs, tests, or committed environment files.
 - Keep business-critical financial rules out of React page components and do not duplicate them across UI code.
-- Preserve ledger semantics: wallet balance equals opening balance plus the sum of signed wallet movements.
+- Preserve ledger semantics: wallet balance equals the sum of signed movements from active transactions. Opening balance is a special `opening_balance` transaction and movement, never a separate mutable balance source that is counted again.
 - Treat transfers as first-class operations, never as unrelated income and expense records.
 - Make financial operations that write multiple records atomic at the database layer.
 - Model transfer fees as wealth-decreasing expense behavior; do not hide them inside a wealth-neutral transfer.
@@ -67,4 +67,3 @@ Before declaring an implementation phase complete, run and report every relevant
 - documentation updates
 
 Report commands and actual outcomes. If a check cannot run, state why and leave the phase incomplete unless its acceptance criteria explicitly permit that limitation. Never infer or invent a passing result.
-

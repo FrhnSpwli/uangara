@@ -1,8 +1,11 @@
+import { Link } from 'react-router'
+
 const foundationItems = [
   'Responsive React application shell',
-  'Routing and not-found handling',
+  'Email and password authentication',
+  'Session-aware protected routing',
   'Installable PWA foundation',
-  'Browser-safe Supabase client boundary',
+  'Owner-scoped profile security foundation',
 ]
 
 export function FoundationPage() {
@@ -10,7 +13,7 @@ export function FoundationPage() {
     <section className="mx-auto grid w-full max-w-5xl gap-10 px-4 py-12 sm:px-6 sm:py-20 lg:grid-cols-[1.25fr_0.75fr] lg:items-center">
       <div>
         <p className="text-brand-700 mb-4 text-sm font-semibold tracking-wide uppercase">
-          Foundation in progress
+          Authentication foundation
         </p>
         <h1 className="max-w-3xl text-4xl font-bold tracking-tight text-balance text-slate-950 sm:text-5xl">
           See where your money lives and how it moves.
@@ -20,9 +23,23 @@ export function FoundationPage() {
           e-wallets, cash, and the wallets people define for themselves.
         </p>
         <div className="border-brand-100 bg-brand-50 mt-8 max-w-2xl rounded-2xl border p-5 text-sm leading-6 text-slate-700">
-          This is the project setup shell. Authentication, wallets,
-          transactions, and financial reporting belong to later phases and are
-          not available yet.
+          Authentication is now available. Wallets, transactions, transfers, and
+          financial reporting remain intentionally unavailable until later
+          phases.
+        </div>
+        <div className="mt-7 flex flex-wrap gap-3">
+          <Link
+            className="bg-brand-700 hover:bg-brand-800 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-colors"
+            to="/auth/sign-in"
+          >
+            Sign in
+          </Link>
+          <Link
+            className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-100"
+            to="/auth/sign-up"
+          >
+            Create account
+          </Link>
         </div>
       </div>
 
