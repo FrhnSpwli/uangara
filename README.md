@@ -1,0 +1,112 @@
+# Uangara
+
+Uangara is a personal finance application designed to show where a user's money is held and how it moves between those locations. It treats bank accounts, e-wallets, cash, and custom user-defined wallets as real financial locations rather than reducing everything to income and expense categories.
+
+> **Status:** Phase 1 complete. The React application shell, routing, quality toolchain, Supabase client boundary, and installable PWA foundation are implemented. Authentication, database schema, and financial features are not implemented yet.
+
+## The problem
+
+Many expense trackers explain what money was spent on but make it difficult to see where money currently lives. They may also misclassify a top-up or bank-to-wallet transfer as an expense followed by income, distorting reports and total wealth.
+
+Uangara starts from two questions:
+
+1. Where is the user's money now?
+2. How is it moving between wallets?
+
+## Product philosophy
+
+- A wallet is a user-owned location that holds money, such as Mandiri, GoPay, cash, or a custom wallet.
+- Income increases total user wealth, and expense decreases it.
+- A transfer moves value between wallets without becoming income or expense.
+- Transfer fees reduce wealth and are recorded as real expenses or equivalent expense movements.
+- Wallet balances are derived from an opening balance and an auditable movement ledger.
+- Financial writes involving multiple records must succeed or fail atomically.
+- User financial data is private by design.
+
+## Planned core capabilities
+
+- User-created wallets for banks, e-wallets, cash, and other financial locations
+- Income and expense recording
+- First-class wallet-to-wallet transfers
+- Transfer-fee tracking
+- Transaction history, search, balance summaries, categories, and reporting
+- Mobile-first, installable PWA experience
+
+For example, a transfer of Rp500,000 from Mandiri to GoPay produces a `-500,000` Mandiri movement and a `+500,000` GoPay movement. It does not change total wealth. If Mandiri also pays a Rp1,000 fee, total wealth decreases only by Rp1,000.
+
+## Intended technology stack
+
+- **Frontend:** React, TypeScript, Vite, Tailwind CSS, React Router
+- **Data and identity:** Supabase, PostgreSQL, Supabase Auth, Row Level Security, and database functions/RPC where appropriate
+- **PWA:** `vite-plugin-pwa`, web app manifest, service worker, and installable standalone presentation
+- **Quality:** ESLint, Prettier, Vitest, and React Testing Library
+
+The browser application uses `@supabase/supabase-js` as its client foundation. A separate Node/Express backend is not planned unless a demonstrated requirement makes one necessary.
+
+## Current foundation
+
+The repository now includes:
+
+- a strict TypeScript React application built with Vite
+- a minimal mobile-first shell with home and not-found routes
+- Tailwind CSS through its current Vite integration
+- a lazy Supabase browser-client factory with validated public configuration
+- Vitest and React Testing Library foundation tests
+- ESLint and Prettier configuration
+- a generated web app manifest and service worker that precaches reviewed static shell assets only
+
+The shell intentionally contains no authentication flow, wallet management, transactions, transfers, categories, reports, or financial data.
+
+## Local development
+
+Uangara currently uses npm and requires Node.js 20.19 or newer.
+
+```sh
+npm install
+npm run dev
+```
+
+The Phase 1 shell does not contact Supabase. Before a later authorized phase uses the client, copy `.env.example` to `.env` and replace its placeholders with a Supabase project URL and browser-safe publishable key. Never place a secret key, service-role key, or database password in a `VITE_*` variable.
+
+Available quality commands:
+
+```sh
+npm run typecheck
+npm run lint
+npm run format:check
+npm run test
+npm run build
+npm run preview
+```
+
+## Architecture direction
+
+The financial source of truth will be ledger-oriented: transactions describe business events, while signed wallet movements affect wallet balances. Critical multi-movement operations, especially transfers, will be committed atomically at the database layer. Supabase RLS will scope financial records to their owning user.
+
+Frontend code will keep page rendering separate from data access and financial business rules. See [Architecture](docs/ARCHITECTURE.md), [Domain Rules](docs/DOMAIN_RULES.md), and [Data Model](docs/DATA_MODEL.md).
+
+## PWA direction
+
+The current foundation provides responsive mobile-first presentation, a manifest, temporary development icons, standalone display metadata, and safe static-shell precaching. Full offline financial transaction synchronization is not part of the initial MVP, and no runtime caching is configured for Supabase or financial API responses.
+
+## Roadmap
+
+Development is organized into phases, beginning with documentation, followed by project setup, authentication and security, wallets, transactions, transfers, reporting, PWA polish, hardening, and deployment acceptance. The full sequence and phase definitions are in the [Roadmap](docs/ROADMAP.md).
+
+## Documentation
+
+- [Product definition](docs/PRODUCT.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Financial domain rules](docs/DOMAIN_RULES.md)
+- [Preliminary data model](docs/DATA_MODEL.md)
+- [Security baseline](docs/SECURITY.md)
+- [PWA strategy](docs/PWA.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Agent development contract](AGENTS.md)
+- [Phase 0 — Foundation & Documentation](docs/phases/PHASE_00_FOUNDATION.md)
+- [Phase 1 — Project Setup & PWA Foundation](docs/phases/PHASE_01_PROJECT_SETUP.md)
+- [Phase 2 — Authentication & Security Foundation](docs/phases/PHASE_02_AUTH_SECURITY.md)
+
+## Screenshots
+
+Screenshots will be added after the product interface advances beyond the foundation shell.
