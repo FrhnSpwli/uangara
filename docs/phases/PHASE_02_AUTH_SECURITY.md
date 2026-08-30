@@ -2,7 +2,9 @@
 
 ## Status
 
-Implemented and remotely verified on `phase-02-auth-security`. Automated frontend, migration, trigger, grants, and integration-level RLS checks pass against the Uangara development project. Live browser signup and email-confirmation acceptance remains manual. Phase 3 has not started.
+`PHASE 2 ACCEPTANCE CRITERIA SATISFIED`
+
+Phase 2 is implemented, remotely verified, manually accepted, and closed on `phase-02-auth-security`. Phase 3 has not started.
 
 ## Objective
 
@@ -133,4 +135,7 @@ On 2026-08-30:
 - Remote pgTAP result: 26 of 26 assertions passed. The suite verified trigger-created profiles, RLS enablement, grants, anonymous denial, owner access, cross-user denial, immutable ownership/timestamps, owner recovery insert, and no client delete.
 - A separate catalog query confirmed that the auth trigger is attached, the profile function is security-definer with a pinned search path, RLS is enabled, and exactly three profile policies exist.
 - A post-test query confirmed that the rollback retained zero test users and zero test profiles.
-- Live browser signup, inbox confirmation, sign-in, reload persistence, and sign-out against the development project remain a manual acceptance journey; email confirmation was not bypassed.
+- Manual acceptance confirmed that an authenticated session persists after browser refresh and protected `/app` remains accessible after refresh.
+- Manual acceptance confirmed that the confirmed user has exactly one corresponding `public.profiles` row.
+- Manual acceptance confirmed successful sign-out and redirect to the sign-in flow when `/app` is accessed afterward.
+- Based on the automated, remote database, and manual results above, all Phase 2 acceptance criteria are satisfied.

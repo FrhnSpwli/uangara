@@ -2,7 +2,7 @@
 
 Uangara is a personal finance application designed to show where a user's money is held and how it moves between those locations. It treats bank accounts, e-wallets, cash, and custom user-defined wallets as real financial locations rather than reducing everything to income and expense categories.
 
-> **Status:** Phase 2 authentication and profile-security foundations are implemented and remotely verified against the Uangara development project. Live browser/email-confirmation acceptance remains manual. Financial features are not implemented.
+> **Status:** Phases 0, 1, and 2 are complete. Authentication and the profile-security foundation are implemented, remotely verified, and manually accepted. Phase 3 wallet management is next and remains planned; no financial features are implemented yet.
 
 ## The problem
 
@@ -19,7 +19,7 @@ Uangara starts from two questions:
 - Income increases total user wealth, and expense decreases it.
 - A transfer moves value between wallets without becoming income or expense.
 - Transfer fees reduce wealth and are recorded as real expenses or equivalent expense movements.
-- Wallet balances are derived from an opening balance and an auditable movement ledger.
+- Wallet balances are derived from an auditable movement ledger, including a special opening-balance transaction.
 - Financial writes involving multiple records must succeed or fail atomically.
 - User financial data is private by design.
 

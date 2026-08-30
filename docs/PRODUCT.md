@@ -48,7 +48,7 @@ A wallet is a location belonging to a user where money is held. It may represent
 
 ## Transaction concept
 
-A transaction is a user-recognizable financial event. For the MVP, its business type is income, expense, or transfer. A transaction may create one or more signed wallet movements that determine balance effects.
+A transaction is a user-recognizable financial event. For the MVP, its business type is income, expense, or transfer. A special `opening_balance` ledger transaction establishes a wallet's opening position without being treated as income or expense. A transaction may create one or more signed wallet movements that determine balance effects.
 
 ## Transfer concept
 
@@ -79,4 +79,3 @@ Later exploration may include budgets, recurring transactions, import and reconc
 - full accounting, tax, payroll, or regulatory reporting
 - full offline financial transaction sync, background queues, and conflict resolution
 - a dedicated Node/Express backend without a demonstrated need
-

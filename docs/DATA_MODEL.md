@@ -2,7 +2,7 @@
 
 ## Status and intent
 
-This document is primarily the conceptual model for future financial schema design. Phase 2 implements only the minimal `profiles` foundation described below; no financial tables exist. Financial field names, types, constraints, and deletion behavior remain unresolved until their authorized phases.
+This document is primarily the conceptual model for future financial schema design. Phase 2 implements only the minimal `profiles` foundation described below; no financial tables exist. Locked domain decisions are recorded here, while remaining field details and constraints stay unresolved until their authorized phases.
 
 ## Relationship overview
 
@@ -48,11 +48,10 @@ Conceptual fields:
 - owner user identifier
 - display name
 - optional descriptive type, institution label, color, or icon key
-- opening-balance representation, subject to the decision below
 - active/archived state
 - created and updated timestamps
 
-Wallet type values should support custom wallets and must not restrict users to a fixed institution list. Archiving is preferable to losing transaction history, though deletion rules remain open.
+Wallet type values should support custom wallets and must not restrict users to a fixed institution list. A mutable wallet balance or opening-balance field is not the ledger source of truth. Archiving is preferable to losing transaction history, though wallet deletion rules remain open.
 
 ### `categories`
 
@@ -78,13 +77,14 @@ Conceptual fields:
 
 - identifier
 - owner user identifier
-- type: `income`, `expense`, or `transfer`
-- positive principal amount where useful as event metadata
+- type: `opening_balance`, `income`, `expense`, or `transfer`
+- integer principal amount where useful as event metadata
 - optional category reference when meaningful
 - description or note
-- effective date/time
-- created and updated timestamps
-- optional status or reversal linkage if the chosen audit model needs it
+- `occurred_at`: when the financial event occurred
+- `created_at`: when the database record was created
+- `updated_at`: when the database record was last modified
+- soft-delete state, with nullable `deleted_at` as the intended direction subject to migration review
 
 The authoritative balance effects live in related wallet movements. Transaction-level amount and type support validation, display, and reporting but must agree with those movements.
 
@@ -98,14 +98,15 @@ Conceptual fields:
 - owner user identifier if selected for direct policy enforcement
 - transaction identifier
 - wallet identifier
-- signed non-zero amount
+- signed non-zero integer amount
 - optional movement role, such as source, destination, fee, or opening balance, if the final model requires it
-- created timestamp
+- `created_at` timestamp
 
 `wallet_movements` exists because a business event can affect more than one wallet. It enables balances to be derived, makes both sides of a transfer part of one transaction, and avoids treating a mutable wallet balance as the only financial truth.
 
 ## Expected transaction shapes
 
+- **Opening balance:** one signed movement for one wallet, produced by a transaction with type `opening_balance`.
 - **Income:** one positive movement into one wallet.
 - **Expense:** one negative movement from one wallet.
 - **Transfer:** one negative source movement and one equal positive destination movement; principal movements sum to zero.
@@ -113,20 +114,37 @@ Conceptual fields:
 
 These shapes should be enforced as close to the database as practical, especially when records are created through RPC.
 
+## Monetary representation
+
+Persisted financial amounts use integer representation rather than floating-point values. The initial product is Indonesian Rupiah-oriented, but multi-currency behavior is not yet designed. Application formatting and display behavior will be defined by later implementation phases.
+
 ## Opening balance
 
 The balance invariant is:
 
 ```text
-wallet balance = opening balance + SUM(wallet movements)
+wallet balance = SUM(wallet movements from active transactions)
 ```
 
-Two plausible representations require a decision before wallet migrations:
+Opening balance is a special transaction with type `opening_balance`. It produces a wallet movement included in the same sum as every other active transaction movement. It is not duplicated in a mutable wallet balance or separate opening-balance source-of-truth field.
 
-1. Store a wallet opening-balance field and sum only subsequent movements.
-2. Represent opening balance as a dedicated ledger event/movement and derive the balance entirely from movements.
+## Balance behavior
 
-The second approach may improve audit consistency; the first may be simpler. Whichever is selected must avoid double counting and define how opening-balance edits affect historical reporting.
+A calculated wallet balance may be negative. Future wallet and transaction validation must preserve this behavior unless the domain decision is explicitly revised.
+
+## Transaction lifecycle
+
+For the MVP, transaction edits use direct update semantics. The transaction and every affected movement must be updated together atomically, with ownership and the complete resulting shape revalidated. An edit must not leave orphaned movements or only one side of a compound event updated.
+
+Transaction deletion uses soft deletion rather than physical deletion. A nullable `deleted_at` column is the intended direction, subject to final schema review. Deleted transactions and their movements remain recoverable and auditable in storage but are excluded from active balances and reports.
+
+## Transaction time
+
+- `occurred_at` is the financial occurrence time and the primary reporting/order timestamp.
+- `created_at` is the database record creation time.
+- `updated_at` is the database record's most recent modification time.
+
+`created_at` must not substitute for `occurred_at`. A deterministic secondary ordering for equal occurrence times remains to be selected during transaction schema implementation.
 
 ## Category ownership and defaults
 
@@ -134,15 +152,12 @@ User-created categories should be owner-scoped. Default categories could be copi
 
 ## Open Questions Before Financial Database Implementation
 
-- What integer or exact numeric unit will store Indonesian rupiah, and what future currency assumptions are allowed?
 - Will the MVP be explicitly single-currency, and where is that currency recorded?
-- Is opening balance a wallet attribute or a dedicated transaction/movement?
 - How are transfer fees linked: an associated expense transaction or a typed movement within a compound operation?
 - Which valid transaction shapes can PostgreSQL constraints enforce directly, and which require RPC validation?
 - Are source and destination wallets required to be different?
-- Are negative wallet balances allowed?
-- Are transactions mutable, soft-deleted, or corrected through reversal events?
-- What are the semantics for effective time, timezone, backdating, and deterministic ordering?
+- What timezone and backdating rules apply to `occurred_at`?
+- Which deterministic secondary key orders transactions sharing the same `occurred_at` value?
 - Are wallet and category deletions prohibited once referenced, or replaced by archival?
 - How are default categories owned, localized, and customized?
 - Should direct inserts into financial tables be denied in favor of narrowly scoped RPC functions?
