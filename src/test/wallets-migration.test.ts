@@ -8,6 +8,13 @@ const migrationPath = resolve(
   'supabase/migrations/20260901000000_create_wallet_ledger.sql',
 )
 const migration = readFileSync(migrationPath, 'utf8')
+const taxonomyMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260901010000_add_e_money_wallet_type.sql',
+  ),
+  'utf8',
+)
 
 describe('Phase 3 wallet ledger migration', () => {
   it('creates the ledger tables without a mutable wallet balance', () => {
@@ -64,5 +71,19 @@ describe('Phase 3 wallet ledger migration', () => {
     expect(migration).toMatch(/transaction\.deleted_at is null/i)
     expect(migration).toMatch(/sum\(movement\.amount\)/i)
     expect(migration).toMatch(/movement\.amount::text as opening_balance/i)
+  })
+
+  it('adds e-money through a forward-compatible constraint and RPC update', () => {
+    expect(taxonomyMigration).toMatch(/drop constraint wallets_type_check/i)
+    expect(taxonomyMigration).toMatch(
+      /type in \('bank', 'e_wallet', 'e_money', 'cash', 'other'\)/i,
+    )
+    expect(taxonomyMigration).toMatch(
+      /create or replace function public\.create_wallet/i,
+    )
+    expect(taxonomyMigration).toMatch(
+      /p_wallet_type not in \('bank', 'e_wallet', 'e_money', 'cash', 'other'\)/i,
+    )
+    expect(taxonomyMigration).not.toMatch(/institution\s+in\s*\(/i)
   })
 })

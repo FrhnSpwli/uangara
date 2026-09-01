@@ -4,7 +4,11 @@ These rules define Uangara's financial meaning independently of UI or schema cho
 
 ## Wallet
 
-A wallet represents a real or conceptual location where one user holds money, such as a bank account, e-wallet, cash, or a custom location. A wallet belongs to one user. Institution-specific wallet names and types must remain user-configurable rather than being the only allowed values.
+A wallet represents a real or conceptual location where one user holds money, such as a bank account, e-wallet, e-money product, cash, or a custom location. A wallet belongs to one user. The supported wallet taxonomy is `bank`, `e_wallet`, `e_money`, `cash`, and `other`.
+
+`type` is the wallet category, `institution` records the bank/provider/issuer when applicable, and `name` is the editable user-facing wallet name. Provider presets are only a frontend convenience: institution strings remain customizable and are not restricted to a fixed catalog at the database boundary.
+
+`other` is reserved for a genuinely distinct place where money exists, such as a cooperative balance or physical money box. A saving goal or mental allocation is not a wallet when its money still exists inside another wallet; modeling both would double-count wealth. Saving Goals are a separate future concept and are not part of Phase 3.
 
 ## Monetary values
 

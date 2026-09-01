@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router'
 import { WalletMetadataFields } from '../components/WalletMetadataFields'
 import { useWalletService } from '../context/useWalletService'
 import { getWalletErrorMessage } from '../services/wallet-errors'
+import type { WalletType } from '../types'
 import { parseMoneyInput } from '../utils/money'
 import {
   type WalletFormErrors,
@@ -14,8 +15,10 @@ export function CreateWalletPage() {
   const service = useWalletService()
   const navigate = useNavigate()
   const [name, setName] = useState('')
-  const [type, setType] = useState('bank')
+  const [nameCustomized, setNameCustomized] = useState(false)
+  const [type, setType] = useState<WalletType>('bank')
   const [institution, setInstitution] = useState('')
+  const [providerSelection, setProviderSelection] = useState('')
   const [openingBalance, setOpeningBalance] = useState('0')
   const [errors, setErrors] = useState<WalletFormErrors>({})
   const [amountError, setAmountError] = useState<string | null>(null)
@@ -26,7 +29,12 @@ export function CreateWalletPage() {
     event.preventDefault()
     setRequestError(null)
 
-    const metadata = validateWalletMetadata({ institution, name, type })
+    const metadata = validateWalletMetadata({
+      institution,
+      name,
+      providerSelection,
+      type,
+    })
     const money = parseMoneyInput(openingBalance)
 
     setErrors(metadata.valid ? {} : metadata.errors)
@@ -75,9 +83,19 @@ export function CreateWalletPage() {
           institution={institution}
           name={name}
           onInstitutionChange={setInstitution}
-          onNameChange={setName}
+          onNameChange={(value) => {
+            setName(value)
+            setNameCustomized(true)
+          }}
+          onNameSuggestion={(value) => {
+            if (!nameCustomized) {
+              setName(value)
+            }
+          }}
+          onProviderSelectionChange={setProviderSelection}
           onTypeChange={setType}
           prefix="create-wallet"
+          providerSelection={providerSelection}
           type={type}
         />
 
