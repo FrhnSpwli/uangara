@@ -2,9 +2,9 @@
 
 ## Status
 
-**Planned only. Phase 3 implementation has not started.**
+`PHASE 3 READY FOR MANUAL ACCEPTANCE`
 
-This document is the executable contract for a future Phase 3 implementation. It authorizes no migration, dependency, database resource, or application-code change until the user explicitly starts the phase.
+Phase 3 is implemented and has passed the automated frontend, build, security, migration, and linked database verification recorded below. The wallet journeys in [Manual acceptance](#manual-acceptance) remain pending; Phase 4 has not started.
 
 ## Objective
 
@@ -18,7 +18,7 @@ Phase 3 introduces only the `opening_balance` financial workflow. Ordinary incom
 - Supabase Auth, protected routes, the `profiles` foundation, and owner-scoped RLS remain operational.
 - The development database can apply versioned migrations and run repository-owned pgTAP tests.
 - The implementer has read [Domain Rules](../DOMAIN_RULES.md), [Data Model](../DATA_MODEL.md), [Architecture](../ARCHITECTURE.md), and [Security](../SECURITY.md).
-- Phase 3 must be explicitly authorized before any item in this plan is implemented.
+- Phase 3 implementation was explicitly authorized on 2026-09-01.
 
 ## Locked decisions
 
@@ -395,18 +395,40 @@ Do not begin Phase 4 while completing this sequence.
 
 ## Completion checklist
 
-- [ ] Phase 3 has been explicitly authorized for implementation
-- [ ] Migration reviewed and reproducibly applied
-- [ ] Wallet, minimal transaction, and movement ownership constraints implemented
-- [ ] Exact-one opening pair and narrow zero exception enforced by the database
-- [ ] Create-wallet, edit-opening-balance, archive, and restore functions implemented and privilege-reviewed
-- [ ] RLS, column grants, composite ownership keys, and cross-user rejection verified
-- [ ] Security-invoker active-balance aggregation implemented and tested
-- [ ] Wallet list, create, detail, edit, archive, and restore experiences implemented
-- [ ] Frontend and pgTAP suites pass with actual counts recorded
-- [ ] Typecheck, lint, formatting, build, and PWA checks pass
+- [x] Phase 3 has been explicitly authorized for implementation
+- [x] Migration reviewed and reproducibly applied
+- [x] Wallet, minimal transaction, and movement ownership constraints implemented
+- [x] Exact-one opening pair and narrow zero exception enforced by the database
+- [x] Create-wallet, edit-opening-balance, archive, and restore functions implemented and privilege-reviewed
+- [x] RLS, column grants, composite ownership keys, and cross-user rejection verified
+- [x] Security-invoker active-balance aggregation implemented and tested
+- [x] Wallet list, create, detail, edit, archive, and restore experiences implemented
+- [x] Frontend and pgTAP suites pass with actual counts recorded
+- [x] Typecheck, lint, formatting, build, and PWA checks pass
 - [ ] Manual acceptance completed
-- [ ] Documentation updated to reflect actual implementation
-- [ ] Absence of Phase 4+ implementation confirmed
+- [x] Documentation updated to reflect actual implementation
+- [x] Absence of Phase 4+ implementation confirmed
 
 Until every applicable item is complete and verified, Phase 3 must not be marked complete.
+
+## Implementation record
+
+The Phase 3 implementation uses migration `20260901000000_create_wallet_ledger.sql`. It adds owner-qualified `wallets`, `transactions`, and `wallet_movements` tables; deferred exact-one opening-pair constraints; owner-scoped RLS and column grants; security-invoker balance/opening-balance views; and authenticated, narrowly granted functions for atomic wallet creation, opening-balance updates, archival, and restoration.
+
+The browser uses a typed wallet service rather than page-level Supabase calls. PostgreSQL `BIGINT` money crosses the service boundary as decimal strings, is validated with `bigint`, and is converted to `number` only after a JavaScript safe-integer check for the RPC input boundary. The authenticated router exposes `/app/wallets`, `/app/wallets/new`, and `/app/wallets/:walletId`.
+
+## Verification record
+
+Verified on 2026-09-01:
+
+- TypeScript type checking passed.
+- ESLint passed.
+- Prettier checking passed for every Phase 3 touched TypeScript/TSX file; unchanged baseline documentation formatting was not rewritten.
+- Vitest passed: 7 test files, 39 tests.
+- The production build passed; `vite-plugin-pwa` generated the service worker with 12 precache entries.
+- Linked migration history was inspected before and after deployment. The dry run contained only `20260901000000_create_wallet_ledger.sql`, the migration applied successfully, and local/remote histories agree.
+- Linked database linting reported no schema errors.
+- The repository-owned linked pgTAP suite passed 75 of 75 assertions. Its transaction rolled back, and a follow-up query confirmed zero retained Phase 3 test users, profiles, and wallets.
+- Wallet/ledger RLS, anonymous denial, owner isolation, cross-owner relational rejection, exact-one opening state, atomic rollback, the narrow zero exception, negative openings, active balance calculation, opening updates, and archive/restore preservation were exercised remotely.
+
+Manual acceptance is intentionally not recorded as passed. The development build is prepared for a developer to sign in and verify positive, zero, and negative openings; refresh persistence; metadata and opening-balance edits; archive visibility; restore; Phase 2 auth regression behavior; and PWA installability. Phase 4 remains unstarted.

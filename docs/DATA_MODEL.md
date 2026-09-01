@@ -2,7 +2,7 @@
 
 ## Status and intent
 
-This document is primarily the conceptual model for future financial schema design. Phase 2 implements only the minimal `profiles` foundation described below; no financial tables exist. Locked domain decisions are recorded here, while remaining field details and constraints stay unresolved until their authorized phases.
+This document remains the conceptual model for financial schema evolution. Phase 2 implements the minimal `profiles` foundation. Phase 3 implements `wallets`, the minimal `transactions` foundation, `wallet_movements`, opening-balance RPCs, and owner-safe ledger-derived balance views. Ordinary transaction behavior and later field details remain deferred to their authorized phases.
 
 ## Relationship overview
 

@@ -31,19 +31,31 @@ export function AuthenticatedAppShell() {
       </a>
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-          <Link
-            aria-label="Uangara application home"
-            className="flex items-center gap-3"
-            to="/app"
-          >
-            <span
-              aria-hidden="true"
-              className="bg-brand-700 grid size-9 place-items-center rounded-xl text-sm font-bold text-white"
+          <div className="flex items-center gap-5">
+            <Link
+              aria-label="Uangara application home"
+              className="flex items-center gap-3"
+              to="/app"
             >
-              U
-            </span>
-            <span className="font-semibold text-slate-950">Uangara</span>
-          </Link>
+              <span
+                aria-hidden="true"
+                className="bg-brand-700 grid size-9 place-items-center rounded-xl text-sm font-bold text-white"
+              >
+                U
+              </span>
+              <span className="hidden font-semibold text-slate-950 sm:inline">
+                Uangara
+              </span>
+            </Link>
+            <nav aria-label="Application navigation">
+              <Link
+                className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                to="/app/wallets"
+              >
+                Wallets
+              </Link>
+            </nav>
+          </div>
           <button
             className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
             disabled={pending}

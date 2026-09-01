@@ -5,12 +5,14 @@ import { describe, expect, it } from 'vitest'
 import { App } from './App'
 import { AppRoutes } from './router/AppRouter'
 import { createAuthServiceStub } from '../test/auth'
+import { createWalletServiceStub } from '../test/wallets'
 
 describe('Uangara application foundation', () => {
   it('boots with the application shell', () => {
     const { service } = createAuthServiceStub()
+    const walletService = createWalletServiceStub()
     window.history.pushState({}, '', '/')
-    render(<App authService={service} />)
+    render(<App authService={service} walletService={walletService} />)
 
     expect(
       screen.getByRole('navigation', { name: 'Primary navigation' }),
