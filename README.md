@@ -2,7 +2,7 @@
 
 Uangara is a personal finance application designed to show where a user's money is held and how it moves between those locations. It treats bank accounts, e-wallets, cash, and custom user-defined wallets as real financial locations rather than reducing everything to income and expense categories.
 
-> **Status:** Phases 0, 1, and 2 are complete. Authentication and the profile-security foundation are implemented, remotely verified, and manually accepted. Phase 3 wallet management is next and remains planned; no financial features are implemented yet.
+> **Status:** Phases 0, 1, and 2 are complete. Phase 3 wallet management is implemented and has passed automated and linked database verification; its manual wallet journeys remain pending. Ordinary income, expense, and transfer features have not started.
 
 ## The problem
 
@@ -53,11 +53,13 @@ The repository now includes:
 - a validated Supabase browser client and React auth boundary
 - email/password sign-up, sign-in, sign-out, session restoration, and email-confirmation feedback
 - a versioned minimal `profiles` migration with owner-scoped RLS and least-privilege grants
-- Vitest and React Testing Library auth/foundation tests plus static migration checks
+- user-owned wallet list, create, detail, metadata edit, opening-balance edit, archive, and restore experiences
+- a versioned wallet ledger migration with `BIGINT` movements, atomic wallet RPCs, owner-qualified foreign keys, RLS, and security-invoker balance views
+- Vitest and React Testing Library auth/wallet tests plus static migration checks
 - ESLint and Prettier configuration
 - a generated web app manifest and service worker that precaches reviewed static shell assets only
 
-The application intentionally contains no wallet management, transactions, transfers, categories, reports, or financial schema.
+The application intentionally exposes only the Phase 3 `opening_balance` ledger workflow. It contains no ordinary income/expense creation, transfers, categories, transaction-history experience, reports, or mutable wallet balance cache.
 
 ## Local development
 
@@ -90,7 +92,7 @@ npm run db:test
 npm run supabase:stop
 ```
 
-The committed profile migration is the schema source of truth. Phase 2 keeps a matching TypeScript database type in `src/types/database.ts`; later schema work should adopt a reviewed reproducible generation workflow before the model expands.
+Committed Supabase migrations are the schema source of truth. The matching TypeScript database type in `src/types/database.ts` includes the Phase 3 wallet ledger and read models; later schema work should retain a reviewed reproducible generation workflow.
 
 ## Architecture direction
 
@@ -119,6 +121,7 @@ Development is organized into phases, beginning with documentation, followed by 
 - [Phase 0 — Foundation & Documentation](docs/phases/PHASE_00_FOUNDATION.md)
 - [Phase 1 — Project Setup & PWA Foundation](docs/phases/PHASE_01_PROJECT_SETUP.md)
 - [Phase 2 — Authentication & Security Foundation](docs/phases/PHASE_02_AUTH_SECURITY.md)
+- [Phase 3 — Wallet Management](docs/phases/PHASE_03_WALLET_MANAGEMENT.md)
 
 ## Screenshots
 

@@ -32,7 +32,7 @@ Secret-bearing workflows, if later required, need an approved trusted execution 
 - Validate user input for useful feedback at the application boundary.
 - Repeat critical validation at the database boundary because clients are untrusted.
 - Use database types, foreign keys, checks, uniqueness rules, and ownership constraints where practical.
-- Reject zero or invalid financial amounts and impossible transaction shapes.
+- Reject invalid financial amounts, impossible transaction shapes, and zero-valued ordinary movements. The only allowed zero movement is the one belonging to a wallet's single active `opening_balance` transaction, as defined in [Domain Rules](DOMAIN_RULES.md).
 - Prevent users from creating movements against wallets or transactions they do not own.
 - Do not rely on TypeScript types alone for runtime or persistence integrity.
 

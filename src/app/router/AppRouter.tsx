@@ -12,6 +12,9 @@ import { SignInPage } from '../../features/auth/pages/SignInPage'
 import { SignUpPage } from '../../features/auth/pages/SignUpPage'
 import { FoundationPage } from '../../features/foundation/FoundationPage'
 import { NotFoundPage } from '../../features/not-found/NotFoundPage'
+import { CreateWalletPage } from '../../features/wallets/pages/CreateWalletPage'
+import { WalletDetailPage } from '../../features/wallets/pages/WalletDetailPage'
+import { WalletListPage } from '../../features/wallets/pages/WalletListPage'
 
 export function AppRoutes() {
   return (
@@ -31,6 +34,9 @@ export function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AuthenticatedAppShell />} path="app">
           <Route index element={<AuthenticatedHomePage />} />
+          <Route element={<WalletListPage />} path="wallets" />
+          <Route element={<CreateWalletPage />} path="wallets/new" />
+          <Route element={<WalletDetailPage />} path="wallets/:walletId" />
         </Route>
       </Route>
     </Routes>

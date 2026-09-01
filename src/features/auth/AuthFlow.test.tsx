@@ -32,7 +32,7 @@ describe('authentication flow', () => {
       'Restoring your session',
     )
     expect(
-      screen.queryByText('Authentication is ready.'),
+      screen.queryByText('Your money locations start here.'),
     ).not.toBeInTheDocument()
   })
 
@@ -52,7 +52,9 @@ describe('authentication flow', () => {
     renderAt('/app', service)
 
     expect(
-      await screen.findByRole('heading', { name: 'Authentication is ready.' }),
+      await screen.findByRole('heading', {
+        name: 'Your money locations start here.',
+      }),
     ).toBeInTheDocument()
   })
 
@@ -78,7 +80,9 @@ describe('authentication flow', () => {
       })
     })
     expect(
-      await screen.findByRole('heading', { name: 'Authentication is ready.' }),
+      await screen.findByRole('heading', {
+        name: 'Your money locations start here.',
+      }),
     ).toBeInTheDocument()
   })
 
@@ -158,7 +162,9 @@ describe('authentication flow', () => {
     renderAt('/auth/sign-in', service)
 
     expect(
-      await screen.findByRole('heading', { name: 'Authentication is ready.' }),
+      await screen.findByRole('heading', {
+        name: 'Your money locations start here.',
+      }),
     ).toBeInTheDocument()
   })
 })

@@ -5,6 +5,7 @@ import { App } from './app/App'
 import { registerServiceWorker } from './app/pwa/register-service-worker'
 import { ConfigurationErrorPage } from './features/auth/components/ConfigurationErrorPage'
 import { getDefaultAuthService } from './features/auth/services/auth-service'
+import { getDefaultWalletService } from './features/wallets/services/wallet-service'
 import './styles.css'
 
 const rootElement = document.getElementById('root')
@@ -21,10 +22,11 @@ const root = createRoot(rootElement)
 
 try {
   const authService = getDefaultAuthService()
+  const walletService = getDefaultWalletService()
 
   root.render(
     <StrictMode>
-      <App authService={authService} />
+      <App authService={authService} walletService={walletService} />
     </StrictMode>,
   )
 } catch {
