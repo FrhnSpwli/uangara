@@ -47,11 +47,11 @@ Conceptual fields:
 - identifier
 - owner user identifier
 - display name
-- optional descriptive type, institution label, color, or icon key
-- active/archived state
+- descriptive type and optional institution label
+- nullable `archived_at` lifecycle timestamp
 - created and updated timestamps
 
-Wallet type values should support custom wallets and must not restrict users to a fixed institution list. A mutable wallet balance or opening-balance field is not the ledger source of truth. Archiving is preferable to losing transaction history, though wallet deletion rules remain open.
+Wallet type values should support custom wallets and must not restrict users to a fixed institution list. Wallet names are not required to be unique. A mutable wallet balance or opening-balance field is not the ledger source of truth. Wallet removal uses archival rather than destructive deletion: archived wallets remain recoverable and retain their ledger history.
 
 ### `categories`
 
@@ -95,18 +95,20 @@ Purpose: record the signed effect of a transaction on one wallet.
 Conceptual fields:
 
 - identifier
-- owner user identifier if selected for direct policy enforcement
+- owner user identifier for direct policy and relationship enforcement
 - transaction identifier
 - wallet identifier
-- signed non-zero integer amount
-- optional movement role, such as source, destination, fee, or opening balance, if the final model requires it
-- `created_at` timestamp
+- signed monetary amount stored as PostgreSQL `BIGINT`
+- movement role; Phase 3 requires `opening_balance`, while later roles belong to their implementing phases
+- `created_at` and `updated_at` timestamps
 
 `wallet_movements` exists because a business event can affect more than one wallet. It enables balances to be derived, makes both sides of a transfer part of one transaction, and avoids treating a mutable wallet balance as the only financial truth.
 
+Movement amounts are normally non-zero. The sole zero-valued exception is the movement belonging to the single active `opening_balance` transaction for its wallet. Every income, expense, transfer, fee, or other ordinary movement remains non-zero unless a later approved architecture change explicitly revises the rule.
+
 ## Expected transaction shapes
 
-- **Opening balance:** one signed movement for one wallet, produced by a transaction with type `opening_balance`.
+- **Opening balance:** exactly one signed movement for one wallet, produced by its single active transaction with type `opening_balance`. The movement may be zero under the opening-balance exception.
 - **Income:** one positive movement into one wallet.
 - **Expense:** one negative movement from one wallet.
 - **Transfer:** one negative source movement and one equal positive destination movement; principal movements sum to zero.
@@ -116,7 +118,7 @@ These shapes should be enforced as close to the database as practical, especiall
 
 ## Monetary representation
 
-Persisted financial amounts use integer representation rather than floating-point values. The initial product is Indonesian Rupiah-oriented, but multi-currency behavior is not yet designed. Application formatting and display behavior will be defined by later implementation phases.
+Persisted financial amounts use whole integer representation rather than floating-point values. PostgreSQL monetary columns are planned as `BIGINT`, whose range is appropriate for realistic Indonesian Rupiah balances and transaction history. Browser code must avoid floating-point monetary arithmetic and accept only safe whole-number inputs at its boundary. The initial product is Indonesian Rupiah-oriented, but multi-currency behavior is not yet designed. Application formatting and display behavior will be defined by later implementation phases.
 
 ## Opening balance
 
@@ -126,7 +128,7 @@ The balance invariant is:
 wallet balance = SUM(wallet movements from active transactions)
 ```
 
-Opening balance is a special transaction with type `opening_balance`. It produces a wallet movement included in the same sum as every other active transaction movement. It is not duplicated in a mutable wallet balance or separate opening-balance source-of-truth field.
+Opening balance is a special transaction with type `opening_balance`. Every wallet has exactly one active opening-balance transaction and exactly one corresponding movement, including wallets opened with zero. That movement is included in the same sum as every other active transaction movement. It is not duplicated in a mutable wallet balance or separate opening-balance source-of-truth field.
 
 ## Balance behavior
 
@@ -158,7 +160,7 @@ User-created categories should be owner-scoped. Default categories could be copi
 - Are source and destination wallets required to be different?
 - What timezone and backdating rules apply to `occurred_at`?
 - Which deterministic secondary key orders transactions sharing the same `occurred_at` value?
-- Are wallet and category deletions prohibited once referenced, or replaced by archival?
+- How should category deletion and archival behave once a category is referenced?
 - How are default categories owned, localized, and customized?
-- Should direct inserts into financial tables be denied in favor of narrowly scoped RPC functions?
+- Which Phase 4+ financial operations, beyond the Phase 3 RPC-only ledger writes, require narrowly scoped RPC functions?
 - What idempotency and concurrency controls are required for critical writes?

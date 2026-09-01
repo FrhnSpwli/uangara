@@ -61,14 +61,16 @@ A wallet movement is a signed amount affecting exactly one wallet as part of a f
 
 - positive values increase the wallet balance
 - negative values decrease the wallet balance
-- zero-value movements are invalid
+- wallet movements are normally required to be non-zero
 - the sign carries ledger direction; user-entered principal amounts should normally be positive before conversion into movements
 
 A transaction may produce one or more movements. Movement records exist so balances and transfer integrity can be derived consistently rather than maintained only by mutable wallet totals.
 
+The only permitted zero-valued wallet movement is the movement belonging to the single active `opening_balance` transaction for a wallet. This narrow exception gives every wallet the same opening-balance ledger lifecycle, including wallets opened with a balance of zero. Income, expense, transfer, fee, and every other ordinary financial movement remain non-zero unless a future approved architecture change explicitly redesigns this rule.
+
 ## Opening balance
 
-Opening balance is represented by a special ledger transaction with type `opening_balance`. That transaction produces a wallet movement whose signed integer amount contributes to the wallet balance like every other movement.
+Opening balance is represented by a special ledger transaction with type `opening_balance`. Every wallet has exactly one active opening-balance transaction and exactly one corresponding movement. The movement may be zero under the narrow exception above; otherwise, its signed integer amount contributes to the wallet balance like every other movement.
 
 Opening balance must not also exist as a mutable `wallet.balance` source of truth or as a separately added balance field. Any future opening-balance edit follows the transaction edit rules below and updates its movement consistently.
 

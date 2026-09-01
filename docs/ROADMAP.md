@@ -1,6 +1,6 @@
 # Roadmap
 
-This roadmap sequences the intended MVP work. Only a phase explicitly requested by the user is authorized for implementation. Phase 0–2 have detailed documents; later phases remain intentionally high-level until their prerequisites and designs are resolved.
+This roadmap sequences the intended MVP work. Only a phase explicitly requested by the user is authorized for implementation. Phase 0–3 have detailed documents; later phases remain intentionally high-level until their prerequisites and designs are resolved.
 
 ## Phase 0 — Foundation & Documentation
 
@@ -35,6 +35,8 @@ Detailed plan: [Phase 2](phases/PHASE_02_AUTH_SECURITY.md)
 - **Major deliverables:** Wallet schema implementing the locked opening-balance ledger semantics, migrations and RLS, wallet create/read/update/archive flows, and balance foundations.
 - **Dependencies:** Phase 2 and resolution of relevant data-model questions.
 - **Definition of done:** Users can securely manage only their own custom wallets and opening positions without compromising ledger semantics.
+
+Detailed plan: [Phase 3](phases/PHASE_03_WALLET_MANAGEMENT.md)
 
 ## Phase 4 — Income & Expense Transactions
 
