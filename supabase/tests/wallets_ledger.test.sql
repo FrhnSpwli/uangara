@@ -481,12 +481,19 @@ select throws_ok(
   'an opening transaction without its movement is rejected'
 );
 
-insert into public.transactions (id, user_id, kind, occurred_at)
+insert into public.transactions (
+  id,
+  user_id,
+  kind,
+  occurred_at,
+  description
+)
 values (
   'cccccccc-cccc-cccc-cccc-cccccccccccc',
   '11111111-1111-1111-1111-111111111111',
   'income',
-  now()
+  now(),
+  'Constraint fixture'
 );
 
 insert into tap_results (result)
@@ -530,6 +537,9 @@ select throws_ok(
   null,
   'zero ordinary movements are rejected'
 );
+
+delete from public.transactions
+where id = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
 
 insert into tap_results (result)
 select throws_ok(
@@ -803,12 +813,19 @@ select throws_ok(
 
 reset role;
 
-insert into public.transactions (id, user_id, kind, occurred_at)
+insert into public.transactions (
+  id,
+  user_id,
+  kind,
+  occurred_at,
+  description
+)
 values (
   'dddddddd-dddd-dddd-dddd-dddddddddddd',
   '11111111-1111-1111-1111-111111111111',
   'income',
-  now()
+  now(),
+  'Balance aggregation fixture'
 );
 
 insert into public.wallet_movements (

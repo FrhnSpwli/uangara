@@ -2,9 +2,9 @@
 
 ## Status
 
-`PLANNED — NOT STARTED`
+`PHASE 4 READY FOR MANUAL ACCEPTANCE`
 
-This document is the implementation contract for Phase 4. It records decisions made against the merged Phase 3 repository but does not authorize or contain implementation. Phase 5 transfers, Phase 6 full history/search, and Phase 8 categories remain unstarted.
+Phase 4 is implemented on `phase-04-income-expense` and has passed local quality gates, linked migration verification, and 205 linked database assertions. The manual acceptance journeys in this document remain pending. Phase 5 transfers, Phase 6 full history/search, and Phase 8 categories remain unstarted.
 
 ## Objective
 
@@ -505,18 +505,46 @@ Phase 4 is ready for manual acceptance only when all applicable criteria below a
 
 ## Definition of done and completion checklist
 
-- [ ] Phase 4 explicitly authorized for implementation
-- [ ] Forward migration reviewed; no applied migration rewritten
-- [ ] Transaction text constraints and exact-one income/expense shape enforced
-- [ ] Create, update, soft-delete, and restore RPCs implemented and privilege-reviewed
-- [ ] Security-invoker Phase 4 read model implemented
-- [ ] RLS, grants, owner-qualified relationships, and IDOR defenses verified
-- [ ] Shared money/time/text validation implemented at frontend and database boundaries
-- [ ] Minimal transaction routes and responsive UI implemented
-- [ ] Existing Phase 2/3 and new Phase 4 database suites pass with recorded linked assertion counts and rollback
-- [ ] Frontend tests and all quality/build/PWA gates pass with actual results
-- [ ] Secret, cache, scope, and documentation-link audits pass
+- [x] Phase 4 explicitly authorized for implementation
+- [x] Forward migration reviewed; no applied migration rewritten
+- [x] Transaction text constraints and exact-one income/expense shape enforced
+- [x] Create, update, soft-delete, and restore RPCs implemented and privilege-reviewed
+- [x] Security-invoker Phase 4 read model implemented
+- [x] RLS, grants, owner-qualified relationships, and IDOR defenses verified
+- [x] Shared money/time/text validation implemented at frontend and database boundaries
+- [x] Minimal transaction routes and responsive UI implemented
+- [x] Existing Phase 2/3 and new Phase 4 database suites pass with recorded linked assertion counts and rollback
+- [x] Frontend tests and all quality/build/PWA gates pass with actual results
+- [x] Secret, cache, scope, and documentation-link audits pass
 - [ ] Manual acceptance completed and results recorded
-- [ ] No Phase 5 transfer, Phase 6 full history/search, or Phase 8 category implementation introduced
+- [x] No Phase 5 transfer, Phase 6 full history/search, or Phase 8 category implementation introduced
 
 Until every applicable item is complete and verified, Phase 4 must not be marked complete. Planning completion alone does not start implementation.
+
+## Implementation record
+
+Implemented on `phase-04-income-expense` on 2026-09-02:
+
+- Migration `20260902000000_add_income_expense_transactions.sql` adds transaction description/notes constraints, exact-one signed income/expense enforcement, deterministic ordering indexes, a precision-safe security-invoker read view, and the four approved atomic RPCs.
+- Create and edit derive movement role/sign in PostgreSQL and preserve one movement row. Soft delete and restore retain and reactivate that same row through `deleted_at`.
+- The existing owner-qualified foreign keys, table RLS, narrow grants, `auth.uid()` checks, and pinned function search paths remain the authorization and integrity boundaries.
+- The authenticated UI now provides a 25-record active/deleted list, create, detail/edit, intentional soft delete, and restore. Full history/search, categories, and transfers remain absent.
+- Shared money handling keeps user input within the JavaScript safe-integer boundary while database/view money remains `BIGINT` and text at the browser read boundary.
+
+### Verification record
+
+Verified on 2026-09-02:
+
+- TypeScript and ESLint passed; ESLint reported zero warnings.
+- Focused Prettier checking passed for every touched TypeScript, TSX, Markdown, JSON, and CSS file. Unrelated baseline formatting was not rewritten.
+- Vitest passed 82 of 82 tests across 11 files.
+- The production build passed with 165 modules transformed. It generated `manifest.webmanifest`, `sw.js`, Workbox output, and 12 reviewed static precache entries. Runtime caching remains empty.
+- The initial linked migration history contained the three accepted Phase 2/3 versions and exactly one pending Phase 4 migration. The dry run listed only `20260902000000_add_income_expense_transactions.sql`; it applied successfully, and all four local/remote versions now agree.
+- Linked database lint completed with no schema errors. It reported two non-functional `warning extra` notices for lock-result variables in the delete/restore RPCs; those variables intentionally support strict one-row ledger-shape locking and do not weaken behavior.
+- The Docker-backed `supabase test db --linked` runner remained unavailable. As established in earlier phases, each repository-owned pgTAP file was instead executed through `supabase db query --linked --file`, preserving its explicit transaction and rollback.
+- The Phase 2/3 regression suites passed 110 of 110 assertions: profiles 26, wallet/ledger 75, and wallet taxonomy 9. The Phase 4 suite passed 95 of 95 assertions, for 205 of 205 linked database assertions overall.
+- A post-test read-only cleanup query confirmed zero retained test users, profiles, wallets, transactions, or movements.
+- Secret and scope audits confirmed that `.env` is ignored and untracked; no service-role key, database password, CLI token, or secret-like committed value exists; no financial runtime cache, dependency change, transfer feature, or category schema was introduced.
+- All 41 local Markdown links resolved, and `git diff --check` passed.
+
+Manual acceptance remains required before Phase 4 can be marked accepted or complete.
