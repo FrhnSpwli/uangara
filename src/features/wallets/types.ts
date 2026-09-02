@@ -1,4 +1,10 @@
-export const walletTypes = ['bank', 'e_wallet', 'cash', 'other'] as const
+export const walletTypes = [
+  'bank',
+  'e_wallet',
+  'e_money',
+  'cash',
+  'other',
+] as const
 
 export type WalletType = (typeof walletTypes)[number]
 export type WalletListMode = 'active' | 'archived'

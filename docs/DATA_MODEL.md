@@ -46,12 +46,15 @@ Conceptual fields:
 
 - identifier
 - owner user identifier
-- display name
-- descriptive type and optional institution label
+- editable display `name`
+- category `type`: `bank`, `e_wallet`, `e_money`, `cash`, or `other`
+- optional `institution` recording the bank, provider, or issuer where applicable
 - nullable `archived_at` lifecycle timestamp
 - created and updated timestamps
 
-Wallet type values should support custom wallets and must not restrict users to a fixed institution list. Wallet names are not required to be unique. A mutable wallet balance or opening-balance field is not the ledger source of truth. Wallet removal uses archival rather than destructive deletion: archived wallets remain recoverable and retain their ledger history.
+Frontend presets may suggest common Indonesian banks, e-wallet providers, and e-money products, but they are not a database enumeration of institutions. Custom institution strings remain valid so new, regional, or uncommon providers do not require a schema change. Cash requires no institution. `other` means another actual stored-money location, not a saving goal or purpose assigned to money that remains in another wallet. Saving Goals remain a separate future concept with no Phase 3 schema.
+
+Wallet names are not required to be unique and remain independently editable from provider metadata. A mutable wallet balance or opening-balance field is not the ledger source of truth. Wallet removal uses archival rather than destructive deletion: archived wallets remain recoverable and retain their ledger history.
 
 ### `categories`
 

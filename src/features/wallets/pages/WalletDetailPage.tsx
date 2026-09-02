@@ -2,9 +2,10 @@ import { type FormEvent, useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 
 import { WalletMetadataFields } from '../components/WalletMetadataFields'
+import { getProviderSelection } from '../config/wallet-presets'
 import { useWalletService } from '../context/useWalletService'
 import { getWalletErrorMessage } from '../services/wallet-errors'
-import type { WalletDetail } from '../types'
+import type { WalletDetail, WalletType } from '../types'
 import { formatMoney, parseMoneyInput } from '../utils/money'
 import {
   getWalletTypeLabel,
@@ -31,8 +32,9 @@ export function WalletDetailPage() {
   const [pendingAction, setPendingAction] = useState<PendingAction>(null)
   const [confirmArchive, setConfirmArchive] = useState(false)
   const [name, setName] = useState('')
-  const [type, setType] = useState('bank')
+  const [type, setType] = useState<WalletType>('bank')
   const [institution, setInstitution] = useState('')
+  const [providerSelection, setProviderSelection] = useState('')
   const [metadataErrors, setMetadataErrors] = useState<WalletFormErrors>({})
   const [openingBalance, setOpeningBalance] = useState('0')
   const [openingError, setOpeningError] = useState<string | null>(null)
@@ -61,6 +63,9 @@ export function WalletDetailPage() {
         setName(result.name)
         setType(result.type)
         setInstitution(result.institution ?? '')
+        setProviderSelection(
+          getProviderSelection(result.type, result.institution, result.name),
+        )
         setOpeningBalance(result.openingBalance)
       }
     } catch (error) {
@@ -91,6 +96,9 @@ export function WalletDetailPage() {
           setName(result.name)
           setType(result.type)
           setInstitution(result.institution ?? '')
+          setProviderSelection(
+            getProviderSelection(result.type, result.institution, result.name),
+          )
           setOpeningBalance(result.openingBalance)
         }
       })
@@ -123,7 +131,12 @@ export function WalletDetailPage() {
       return
     }
 
-    const metadata = validateWalletMetadata({ institution, name, type })
+    const metadata = validateWalletMetadata({
+      institution,
+      name,
+      providerSelection,
+      type,
+    })
     setMetadataErrors(metadata.valid ? {} : metadata.errors)
 
     if (!metadata.valid) {
@@ -335,8 +348,10 @@ export function WalletDetailPage() {
             name={name}
             onInstitutionChange={setInstitution}
             onNameChange={setName}
+            onProviderSelectionChange={setProviderSelection}
             onTypeChange={setType}
             prefix="edit-wallet"
+            providerSelection={providerSelection}
             type={type}
           />
           <button

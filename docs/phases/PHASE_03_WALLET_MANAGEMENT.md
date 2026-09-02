@@ -28,6 +28,7 @@ These decisions are not open during Phase 3:
 | --- | --- |
 | Monetary representation | Whole integer units; persisted monetary columns use PostgreSQL `BIGINT`, never floating point |
 | Product currency scope | Initially Indonesian Rupiah-oriented; no multi-currency behavior |
+| Wallet taxonomy | `bank`, `e_wallet`, `e_money`, `cash`, and `other` |
 | Opening balance | Special transaction with kind `opening_balance` and one corresponding wallet movement |
 | Zero opening balance | Still creates the opening transaction and its single zero-valued movement |
 | Zero movement rule | Zero is prohibited except for that single active opening-balance movement |
@@ -39,7 +40,9 @@ These decisions are not open during Phase 3:
 | Row modification time | `updated_at` |
 | Wallet removal | Archive with `archived_at`; no hard deletion in Phase 3 |
 
-Wallet names are user-controlled and need not be globally or per-user unique. Financial institution names are data, not hardcoded wallet identities.
+Wallet `type` is its category, `institution` is its provider/issuer where applicable, and `name` is its editable user-facing identity. Names need not be globally or per-user unique. Provider presets are frontend convenience data, not a database enumeration of institutions.
+
+`other` represents an actual distinct place where money exists. Saving goals or mental allocations are not wallets when their money remains in another wallet, because recording both would double-count wealth. Saving Goals remain future work and have no Phase 3 schema or feature.
 
 ## Architecture decisions
 
@@ -95,7 +98,7 @@ Planned fields and constraints:
 - UUID primary identifier;
 - `user_id` owned by and linked to the authenticated user;
 - trimmed `name`, 1–100 characters;
-- text `type` constrained to `bank`, `e_wallet`, `cash`, or `other`, without a PostgreSQL enum;
+- text `type` constrained to `bank`, `e_wallet`, `e_money`, `cash`, or `other`, without a PostgreSQL enum;
 - nullable, trimmed `institution`, at most 100 characters;
 - nullable `archived_at` timestamp;
 - database-managed `created_at` and `updated_at` timestamps;
@@ -219,9 +222,16 @@ The experience is mobile-first and lives inside the authenticated application sh
 
 ### Add wallet
 
-- Inputs: name, type, optional institution, and opening balance.
+- Inputs: type, provider/issuer where applicable, editable name, and opening balance.
 - Default opening balance to `0`.
-- Offer `bank`, `e_wallet`, `cash`, and `other`; do not hardcode institution names as mandatory choices.
+- Offer `bank`, `e_wallet`, `e_money`, `cash`, and `other`.
+- Centralize initial Indonesian bank, e-wallet, and e-money presets in frontend configuration while preserving an explicit custom-provider path. The database continues to accept bounded custom institution strings.
+- Bank presets: Bank Mandiri, BNI, BRI, BCA, Bank Jago, SeaBank, CIMB Niaga, BTN, Bank Syariah Indonesia, and Other Bank.
+- E-wallet presets: GoPay, DANA, OVO, ShopeePay, LinkAja, and Other E-Wallet.
+- E-money presets: Mandiri e-Money, BRIZZI, TapCash, Flazz, and Other E-Money. Their known issuer mapping is Bank Mandiri, BRI, BNI, and BCA respectively.
+- Map e-money products to their issuer metadata where known, such as TapCash to BNI, while keeping the suggested wallet name editable.
+- Do not show a provider selector for cash. For `other`, keep provider metadata optional and explain briefly that the wallet must be a real money location rather than a saving purpose.
+- Suggest a wallet name from a selected preset until the user manually edits the name; later provider changes must then preserve that intentional custom name.
 - Disable duplicate submission while the atomic create request is pending.
 - Present safe field and request errors without exposing database internals.
 
@@ -255,7 +265,8 @@ Avoid extra routes unless implementation reveals a clear usability need. An unav
 Validate for usability in TypeScript and repeat integrity-critical rules in PostgreSQL:
 
 - trim wallet names and require 1–100 characters;
-- accept only `bank`, `e_wallet`, `cash`, or `other` for wallet type;
+- accept only `bank`, `e_wallet`, `e_money`, `cash`, or `other` for wallet type;
+- require a preset or non-empty custom provider for bank, e-wallet, and e-money creation; continue to render existing null/custom provider values safely during editing;
 - normalize a blank institution to `null`; otherwise trim and limit it to 100 characters;
 - treat the opening amount as a base-10 whole-number string, rejecting fractions, exponent notation, `NaN`, infinity, and unsafe coercion;
 - constrain browser-entered amounts to JavaScript's safe-integer range, while sending an exact integer representation to PostgreSQL `BIGINT`;
@@ -276,6 +287,9 @@ Use mocked service boundaries, never live credentials, to cover at minimum:
 - loading, request-error, and empty-wallet states;
 - access to the archived-wallet view;
 - add-wallet validation, including the zero default and acceptance of a negative opening amount;
+- bank, e-wallet, and e-money preset mapping plus every custom-provider path;
+- name suggestion before manual editing and preservation after the name becomes user-customized;
+- cash without provider metadata, the `other` real-location explanation, and existing custom institutions during editing;
 - successful atomic create flow and duplicate-submit prevention;
 - metadata and opening-balance edit flows calling their correct boundaries;
 - archive confirmation, active-list removal, archived recovery, and restore;
@@ -325,20 +339,24 @@ Run and report the actual results of:
 Complete and record all of the following against the approved development environment:
 
 1. Sign in.
-2. Create a wallet with a positive opening balance.
-3. Confirm its displayed calculated balance.
-4. Create a wallet with a zero opening balance and confirm it succeeds.
-5. Create or edit a wallet to a negative opening balance and confirm the negative balance is displayed.
-6. Refresh and confirm all wallet data persists.
-7. Edit wallet name, type, and optional institution.
-8. Edit the opening balance and verify the calculated balance updates without creating a duplicate opening record.
-9. Archive a wallet through the intentional confirmation.
-10. Confirm it disappears from the default active list.
-11. Confirm the archived wallet remains recoverable with its balance/history intact.
-12. Restore the wallet and confirm it returns to the active list.
-13. Confirm another user's wallet cannot be read or modified through UI or direct API attempts.
-14. Confirm Phase 2 session persistence, protected routing, and sign-out behavior remain intact.
-15. Confirm manifest, service worker, and installable PWA behavior continue to work without caching authenticated wallet data.
+2. Select a bank preset and confirm it suggests an editable wallet name and stores the expected provider.
+3. Change presets before editing the suggested name and confirm the suggestion follows the preset.
+4. Manually customize the wallet name, change the preset, and confirm the custom name is preserved.
+5. Create a bank with `Other Bank` and a custom provider.
+6. Create e-wallets through both a preset and `Other E-Wallet`.
+7. Create e-money through a preset and confirm its issuer mapping; also exercise `Other E-Money`.
+8. Create a cash wallet and confirm no provider is required.
+9. Select `other` and confirm the UI describes an actual money location without suggesting saving goals.
+10. Create wallets with positive, zero, and negative opening balances and confirm each calculated balance.
+11. Refresh and confirm all wallet data persists.
+12. Edit a wallet with a custom or previously unknown institution and confirm its value is preserved until intentionally changed.
+13. Edit wallet name, type, and provider metadata.
+14. Edit the opening balance and verify the calculated balance updates without creating a duplicate opening record.
+15. Archive a wallet through the intentional confirmation and confirm it disappears from the default active list.
+16. Confirm the archived wallet remains recoverable with its balance/history intact, then restore it.
+17. Confirm another user's wallet cannot be read or modified through UI or direct API attempts.
+18. Confirm Phase 2 session persistence, protected routing, and sign-out behavior remain intact.
+19. Confirm manifest, service worker, and installable PWA behavior continue to work without caching authenticated wallet data.
 
 ## Out of scope
 
@@ -372,7 +390,7 @@ Do not begin Phase 4 while completing this sequence.
 
 ## Acceptance criteria
 
-1. A signed-in user can create a wallet with user-controlled metadata and positive, zero, or negative opening balance.
+1. A signed-in user can create `bank`, `e_wallet`, `e_money`, `cash`, and `other` wallets with user-controlled metadata and positive, zero, or negative opening balance.
 2. Creation atomically produces one wallet, one active `opening_balance` transaction, and one corresponding movement, or produces none on failure.
 3. Every valid wallet has exactly one opening pair; duplicate, missing, mismatched, or soft-deleted opening state is rejected by the database.
 4. Zero is accepted only for the single opening movement and rejected for every ordinary movement.
@@ -392,6 +410,7 @@ Do not begin Phase 4 while completing this sequence.
 18. No service-role credential, database password, real secret, access token, or authenticated financial response cache is introduced.
 19. Manual acceptance passes and its exact results are recorded.
 20. No Phase 4 income/expense workflow, Phase 5 transfer behavior, or other later feature is implemented.
+21. Provider presets remain optional conveniences over unrestricted custom institution strings; `other` is presented only as an actual money location, not as a Saving Goals substitute.
 
 ## Completion checklist
 
@@ -417,6 +436,8 @@ The Phase 3 implementation uses migration `20260901000000_create_wallet_ledger.s
 
 The browser uses a typed wallet service rather than page-level Supabase calls. PostgreSQL `BIGINT` money crosses the service boundary as decimal strings, is validated with `bigint`, and is converted to `number` only after a JavaScript safe-integer check for the RPC input boundary. The authenticated router exposes `/app/wallets`, `/app/wallets/new`, and `/app/wallets/:walletId`.
 
+The wallet-taxonomy refinement uses forward migration `20260901010000_add_e_money_wallet_type.sql` to add `e_money` to the existing check constraint and wallet-creation function without rewriting the applied ledger migration. Frontend preset configuration maps common Indonesian providers and e-money products to `institution` and an editable name suggestion. Custom provider strings remain supported and are not constrained to the preset catalog.
+
 ## Verification record
 
 Verified on 2026-09-01:
@@ -431,4 +452,17 @@ Verified on 2026-09-01:
 - The repository-owned linked pgTAP suite passed 75 of 75 assertions. Its transaction rolled back, and a follow-up query confirmed zero retained Phase 3 test users, profiles, and wallets.
 - Wallet/ledger RLS, anonymous denial, owner isolation, cross-owner relational rejection, exact-one opening state, atomic rollback, the narrow zero exception, negative openings, active balance calculation, opening updates, and archive/restore preservation were exercised remotely.
 
-Manual acceptance is intentionally not recorded as passed. The development build is prepared for a developer to sign in and verify positive, zero, and negative openings; refresh persistence; metadata and opening-balance edits; archive visibility; restore; Phase 2 auth regression behavior; and PWA installability. Phase 4 remains unstarted.
+### Wallet-taxonomy refinement verification
+
+Verified on 2026-09-01:
+
+- The remote dry run contained only `20260901010000_add_e_money_wallet_type.sql`; it applied successfully, and local/remote migration histories agree.
+- Linked database linting reported no schema errors.
+- The original Phase 3 pgTAP suite remained green at 75 of 75 assertions. The taxonomy suite passed 9 of 9 assertions, for 84 of 84 linked assertions overall. Both test transactions rolled back, and follow-up cleanup reported zero retained test users, profiles, or wallets.
+- Vitest passed 53 of 53 tests across 7 files, including bank/e-wallet/e-money presets, custom providers, cash/other behavior, name-autofill preservation, and editing existing null/custom institutions without silent metadata loss.
+- TypeScript, ESLint, and focused Prettier checks passed.
+- The production build passed with 153 modules transformed; `vite-plugin-pwa` generated the service worker with 12 static precache entries.
+- The secret audit passed across 84 committable files, `.env` remained ignored, all 39 local Markdown links resolved, and the PWA retained no authenticated-data runtime cache.
+- The original ledger migration, wallet service, exact monetary adapter, dependencies, and financial integrity architecture were unchanged.
+
+Manual acceptance is intentionally not recorded as passed. The development build is prepared for a developer to verify preset/custom-provider behavior and editable name suggestions alongside positive, zero, and negative openings; refresh persistence; metadata and opening-balance edits; archive visibility; restore; Phase 2 auth regression behavior; and PWA installability. Phase 4 remains unstarted.
