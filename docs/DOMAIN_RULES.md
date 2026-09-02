@@ -8,7 +8,7 @@ A wallet represents a real or conceptual location where one user holds money, su
 
 `type` is the wallet category, `institution` records the bank/provider/issuer when applicable, and `name` is the editable user-facing wallet name. Provider presets are only a frontend convenience: institution strings remain customizable and are not restricted to a fixed catalog at the database boundary.
 
-`other` is reserved for a genuinely distinct place where money exists, such as a cooperative balance or physical money box. A saving goal or mental allocation is not a wallet when its money still exists inside another wallet; modeling both would double-count wealth. Saving Goals are a separate future concept and are not part of Phase 3.
+`other` is reserved for a genuinely distinct place where money exists, such as a cooperative balance or physical money box. A saving goal or mental allocation is not a wallet when its money still exists inside another wallet; modeling both would double-count wealth. Saving Goals are a separate future concept and are not part of the current wallet model.
 
 ## Monetary values
 
@@ -18,6 +18,8 @@ Persisted financial amounts use integer representation, not floating-point value
 
 Income is an external inflow that increases the user's total wealth. It produces a positive movement in the receiving wallet.
 
+For an ordinary income transaction, the user supplies a positive, non-zero magnitude and the database creates exactly one positive movement. The movement is the authoritative balance effect.
+
 ```text
 Salary into Mandiri: Mandiri +8,000,000
 ```
@@ -25,6 +27,8 @@ Salary into Mandiri: Mandiri +8,000,000
 ## Expense
 
 Expense is an external outflow that decreases the user's total wealth. It produces a negative movement in the paying wallet.
+
+For an ordinary expense transaction, the user supplies a positive, non-zero magnitude and the database derives exactly one negative movement. Users do not enter a negative amount to express an expense.
 
 ```text
 Purchase from GoPay: GoPay -35,000
@@ -115,16 +119,20 @@ Financial records must remain internally consistent throughout their lifecycle.
 - The MVP uses direct update semantics for transaction edits.
 - Revalidate ownership and the complete resulting financial shape.
 - Directly update the transaction and replace or adjust all affected movements atomically.
+- Phase 4 permits an ordinary `income` transaction to be corrected to `expense`, or vice versa, because both have one-movement shapes; the movement role and sign must change atomically.
+- Opening balances and transfers cannot be converted through the ordinary income/expense edit path.
+- A soft-deleted transaction must be restored before it can be edited.
 - Do not permit a temporary or final state in which only one side of a transfer reflects the edit.
 - Do not leave orphaned or partially updated movements.
 
 ### Delete
 
 - The MVP uses soft deletion for transactions rather than physical deletion.
-- A nullable `deleted_at` timestamp is the intended schema direction, subject to final migration review.
+- Transaction state is represented by nullable `deleted_at`; a non-null value means the transaction is deleted.
 - Keep the transaction and its movements recoverable at the data layer.
 - Exclude soft-deleted transactions and their movements from active balances and reports.
-- Apply any delete or restore state change consistently and atomically; never hide only one movement of a multi-movement event.
+- Restoration clears `deleted_at` and reactivates the same preserved movement effects exactly once.
+- Apply any delete or restore state change consistently and atomically; never hide, delete, or recreate only one movement of a multi-movement event.
 
 ## Time semantics
 
@@ -132,14 +140,15 @@ Financial records must remain internally consistent throughout their lifecycle.
 - `created_at` records when the database row was created.
 - `updated_at` records when the database row was last modified.
 
-Financial ordering and reporting primarily use `occurred_at`. `created_at` must not be overloaded as occurrence time. A deterministic secondary ordering for events with the same occurrence time will be selected when the transaction schema is implemented.
+Financial ordering and reporting primarily use `occurred_at`. `created_at` must not be overloaded as occurrence time. The deterministic transaction order is `occurred_at DESC`, then `created_at DESC`, then `id DESC`.
+
+For Phase 4 ordinary income and expense, backdating is allowed and a future `occurred_at` is rejected so an event does not affect the current ledger before it occurs. Scheduled and recurring transactions require a separate future design.
 
 ## Risks future phases must resolve
 
 - maximum amounts and any future currency behavior
 - exact fee linkage and categorization
-- deterministic secondary ordering for equal `occurred_at` values
-- database enforcement of valid movement count, signs, ownership, and transfer balance
+- database enforcement of the remaining future transaction shapes, including transfer balance
 - concurrent writes and idempotency for RPC operations
 
 These are open design decisions, not permission to weaken the invariants above.

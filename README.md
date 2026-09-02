@@ -2,7 +2,7 @@
 
 Uangara is a personal finance application designed to show where a user's money is held and how it moves between those locations. It treats bank accounts, e-wallets, cash, and custom user-defined wallets as real financial locations rather than reducing everything to income and expense categories.
 
-> **Status:** Phases 0, 1, and 2 are complete. Phase 3 wallet management is implemented and has passed automated and linked database verification; its manual wallet journeys remain pending. Ordinary income, expense, and transfer features have not started.
+> **Status:** Phases 0–3 are complete and accepted. Phase 4 income/expense behavior has a detailed implementation plan but has not started. Ordinary income, expense, and transfer features are not implemented.
 
 ## The problem
 
@@ -122,6 +122,7 @@ Development is organized into phases, beginning with documentation, followed by 
 - [Phase 1 — Project Setup & PWA Foundation](docs/phases/PHASE_01_PROJECT_SETUP.md)
 - [Phase 2 — Authentication & Security Foundation](docs/phases/PHASE_02_AUTH_SECURITY.md)
 - [Phase 3 — Wallet Management](docs/phases/PHASE_03_WALLET_MANAGEMENT.md)
+- [Phase 4 — Income & Expense Transactions](docs/phases/PHASE_04_INCOME_EXPENSE_TRANSACTIONS.md)
 
 ## Screenshots
 

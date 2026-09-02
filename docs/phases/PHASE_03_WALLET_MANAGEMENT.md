@@ -2,9 +2,9 @@
 
 ## Status
 
-`PHASE 3 READY FOR MANUAL ACCEPTANCE`
+`PHASE 3 ACCEPTANCE CRITERIA SATISFIED`
 
-Phase 3 is implemented and has passed the automated frontend, build, security, migration, and linked database verification recorded below. The wallet journeys in [Manual acceptance](#manual-acceptance) remain pending; Phase 4 has not started.
+Phase 3 is implemented, manually accepted, merged into `main`, and closed. It passed the automated frontend, build, security, migration, and linked database verification recorded below. Phase 4 implementation has not started.
 
 ## Objective
 
@@ -424,7 +424,7 @@ Do not begin Phase 4 while completing this sequence.
 - [x] Wallet list, create, detail, edit, archive, and restore experiences implemented
 - [x] Frontend and pgTAP suites pass with actual counts recorded
 - [x] Typecheck, lint, formatting, build, and PWA checks pass
-- [ ] Manual acceptance completed
+- [x] Manual acceptance completed
 - [x] Documentation updated to reflect actual implementation
 - [x] Absence of Phase 4+ implementation confirmed
 
@@ -465,4 +465,4 @@ Verified on 2026-09-01:
 - The secret audit passed across 84 committable files, `.env` remained ignored, all 39 local Markdown links resolved, and the PWA retained no authenticated-data runtime cache.
 - The original ledger migration, wallet service, exact monetary adapter, dependencies, and financial integrity architecture were unchanged.
 
-Manual acceptance is intentionally not recorded as passed. The development build is prepared for a developer to verify preset/custom-provider behavior and editable name suggestions alongside positive, zero, and negative openings; refresh persistence; metadata and opening-balance edits; archive visibility; restore; Phase 2 auth regression behavior; and PWA installability. Phase 4 remains unstarted.
+Manual acceptance was completed successfully before the Phase 3 pull request was merged into `main`. The accepted journeys covered preset/custom-provider behavior and editable name suggestions alongside positive, zero, and negative openings; refresh persistence; metadata and opening-balance edits; archive visibility; restore; Phase 2 auth regression behavior; and the PWA baseline. Phase 4 implementation remains unstarted.
