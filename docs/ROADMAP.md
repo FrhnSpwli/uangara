@@ -1,6 +1,6 @@
 # Roadmap
 
-This roadmap sequences the intended MVP work. Only a phase explicitly requested by the user is authorized for implementation. Phases 0–4 are complete and accepted; Phase 5 is next/planned, while later phases remain intentionally high-level until their prerequisites and designs are resolved.
+This roadmap sequences the intended MVP work. Only a phase explicitly requested by the user is authorized for implementation. Phases 0–4 are complete and accepted; Phase 5 is next/planned with an accepted implementation contract, while later phases remain intentionally high-level until their prerequisites and designs are resolved.
 
 ## Phase 0 — Foundation & Documentation
 
@@ -62,8 +62,10 @@ Detailed plan: [Phase 4](phases/PHASE_04_INCOME_EXPENSE_TRANSACTIONS.md)
 
 - **Objective:** Implement first-class, wealth-neutral internal transfers with optional wealth-decreasing fees.
 - **Major deliverables:** Transfer RPC and validation, source/destination UI, fee treatment, atomic direct-edit and soft-delete behavior, and integrity tests.
-- **Dependencies:** Phase 4 and explicit resolution of fee and mutation design.
+- **Dependencies:** Phase 4 and the accepted transfer contract, including fee and mutation design.
 - **Definition of done:** Transfer principal is atomic and sums to zero; fees alone reduce wealth and report as expense.
+
+Detailed plan: [Phase 5](phases/PHASE_05_WALLET_TRANSFERS.md)
 
 ## Phase 6 — Transaction History & Search
 

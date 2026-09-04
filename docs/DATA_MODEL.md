@@ -2,7 +2,7 @@
 
 ## Status and intent
 
-This document remains the conceptual model for financial schema evolution. Phase 2 implements the minimal `profiles` foundation. Phase 3 implements `wallets`, the minimal `transactions` foundation, `wallet_movements`, opening-balance RPCs, and owner-safe ledger-derived balance views. Phase 4 income/expense behavior is now designed in its phase contract but remains unimplemented. Later transaction shapes and fields remain deferred to their authorized phases.
+This document remains the conceptual model for financial schema evolution. Phase 2 implements the minimal `profiles` foundation. Phase 3 implements `wallets`, the minimal `transactions` foundation, `wallet_movements`, opening-balance RPCs, and owner-safe ledger-derived balance views. Phase 4 implements atomic income/expense creation, direct edit, soft deletion, restoration, and its minimal read model. Phase 5 transfer behavior is planned but remains unimplemented.
 
 ## Relationship overview
 
@@ -86,7 +86,9 @@ Implemented Phase 3 fields:
 - `updated_at`: when the database record was last modified
 - nullable `deleted_at` soft-delete state; opening-balance rows are constrained to remain active
 
-The Phase 4 plan adds a required bounded `description` for income/expense and optional bounded `notes`. The physical columns remain nullable where necessary so existing opening-balance rows do not receive fabricated text. Phase 4 adds no transaction-level amount and no category reference: its one signed wallet movement is the authoritative amount effect, while category ownership and lifecycle remain Phase 8 decisions.
+Phase 4 adds a required bounded `description` for income/expense and optional bounded `notes`. The physical columns remain nullable where necessary so existing opening-balance rows do not receive fabricated text. Phase 4 adds no transaction-level amount and no category reference: its one signed wallet movement is the authoritative amount effect, while category ownership and lifecycle remain Phase 8 decisions.
+
+Phase 5 will require the same bounded description/notes lifecycle for transfers. It will add a nullable transfer-create idempotency key with user-scoped transfer uniqueness so an ambiguous browser retry cannot create a duplicate transfer. No client supplies `user_id`; the database derives ownership from `auth.uid()`.
 
 ### `wallet_movements`
 
@@ -111,8 +113,8 @@ Movement amounts are normally non-zero. The sole zero-valued exception is the mo
 - **Opening balance:** exactly one signed movement for one wallet, produced by its single active transaction with type `opening_balance`. The movement may be zero under the opening-balance exception.
 - **Income:** exactly one persistent positive movement with role `income` into one wallet; user input is a positive, non-zero magnitude.
 - **Expense:** exactly one persistent negative movement with role `expense` from one wallet; user input is a positive, non-zero magnitude.
-- **Transfer:** one negative source movement and one equal positive destination movement; principal movements sum to zero.
-- **Transfer with fee:** the balanced transfer principal plus a separately identifiable negative expense effect. Whether the fee is represented by an associated expense transaction or an additional typed movement is open, but it must reduce wealth and report as expense.
+- **Transfer:** exactly one negative `transfer_source` movement and one equal positive `transfer_destination` movement against different wallets owned by the same user; principal movements sum to zero.
+- **Transfer with fee:** the same balanced principal plus exactly one optional negative `transfer_fee` movement against the source wallet. It is expense-like for future reporting but remains part of the one transfer event; no fee row exists when the fee is zero.
 
 These shapes should be enforced as close to the database as practical, especially when records are created through RPC.
 
@@ -159,9 +161,6 @@ Phase 4 deliberately adds neither a category table nor nullable category groundw
 ## Open Questions for Later Financial Phases
 
 - Will the MVP be explicitly single-currency, and where is that currency recorded?
-- How are transfer fees linked: an associated expense transaction or a typed movement within a compound operation?
-- Which transfer/fee invariants can PostgreSQL constraints enforce directly, and which require RPC validation?
-- Are source and destination wallets required to be different?
 - How should category deletion and archival behave once a category is referenced?
 - How are default categories owned, localized, and customized?
-- What idempotency and concurrency controls are required for critical writes?
+- What broader idempotency and concurrent-write controls are required beyond the transfer-create retry key?

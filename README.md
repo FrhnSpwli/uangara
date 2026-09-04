@@ -126,6 +126,8 @@ Development is organized into phases, beginning with documentation, followed by 
 - [Phase 3 — Wallet Management](docs/phases/PHASE_03_WALLET_MANAGEMENT.md)
 - [Phase 4 — Income & Expense Transactions](docs/phases/PHASE_04_INCOME_EXPENSE_TRANSACTIONS.md)
 
+- [Phase 5 — Wallet-to-Wallet Transfers](docs/phases/PHASE_05_WALLET_TRANSFERS.md)
+
 ## Screenshots
 
 Screenshots will be added after the product interface advances beyond the foundation shell.
