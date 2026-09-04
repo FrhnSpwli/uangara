@@ -6,6 +6,7 @@ import { registerServiceWorker } from './app/pwa/register-service-worker'
 import { ConfigurationErrorPage } from './features/auth/components/ConfigurationErrorPage'
 import { getDefaultAuthService } from './features/auth/services/auth-service'
 import { getDefaultTransactionService } from './features/transactions/services/transaction-service'
+import { getDefaultTransferService } from './features/transfers/services/transfer-service'
 import { getDefaultWalletService } from './features/wallets/services/wallet-service'
 import './styles.css'
 
@@ -24,6 +25,7 @@ const root = createRoot(rootElement)
 try {
   const authService = getDefaultAuthService()
   const transactionService = getDefaultTransactionService()
+  const transferService = getDefaultTransferService()
   const walletService = getDefaultWalletService()
 
   root.render(
@@ -31,6 +33,7 @@ try {
       <App
         authService={authService}
         transactionService={transactionService}
+        transferService={transferService}
         walletService={walletService}
       />
     </StrictMode>,

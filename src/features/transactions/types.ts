@@ -18,6 +18,28 @@ export interface TransactionSummary {
   walletName: string
 }
 
+export interface TransferSummary {
+  amount: string
+  createdAt: string
+  deletedAt: string | null
+  description: string
+  destinationWalletArchivedAt: string | null
+  destinationWalletId: string
+  destinationWalletName: string
+  feeAmount: string
+  id: string
+  kind: 'transfer'
+  notes: string | null
+  occurredAt: string
+  sourceWalletArchivedAt: string | null
+  sourceWalletId: string
+  sourceWalletName: string
+  updatedAt: string
+  walletName: string
+}
+
+export type FinancialTransactionSummary = TransactionSummary | TransferSummary
+
 export type TransactionDetail = TransactionSummary
 
 export interface IncomeExpenseTransactionInput {
@@ -38,7 +60,9 @@ export interface TransactionWalletOption {
 export interface TransactionService {
   createTransaction: (input: IncomeExpenseTransactionInput) => Promise<string>
   getTransaction: (transactionId: string) => Promise<TransactionDetail | null>
-  listTransactions: (mode: TransactionListMode) => Promise<TransactionSummary[]>
+  listTransactions: (
+    mode: TransactionListMode,
+  ) => Promise<FinancialTransactionSummary[]>
   restoreTransaction: (transactionId: string) => Promise<void>
   softDeleteTransaction: (transactionId: string) => Promise<void>
   updateTransaction: (

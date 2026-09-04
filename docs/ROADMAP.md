@@ -1,6 +1,6 @@
 # Roadmap
 
-This roadmap sequences the intended MVP work. Only a phase explicitly requested by the user is authorized for implementation. Phases 0–4 are complete and accepted; Phase 5 is next/planned with an accepted implementation contract, while later phases remain intentionally high-level until their prerequisites and designs are resolved.
+This roadmap sequences the intended MVP work. Only a phase explicitly requested by the user is authorized for implementation. Phases 0–4 are complete and accepted. Phase 5 is implemented and has passed automated and linked-database verification, with manual acceptance pending. Phase 6 has not started, and later phases remain intentionally high-level until authorized.
 
 ## Phase 0 — Foundation & Documentation
 

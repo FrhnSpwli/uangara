@@ -1,9 +1,11 @@
 import { vi } from 'vitest'
 
 import type {
+  FinancialTransactionSummary,
   TransactionDetail,
   TransactionService,
   TransactionSummary,
+  TransferSummary,
 } from '../features/transactions/types'
 
 export function createTransactionSummary(
@@ -26,6 +28,31 @@ export function createTransactionSummary(
   }
 }
 
+export function createTransferSummary(
+  overrides: Partial<TransferSummary> = {},
+): TransferSummary {
+  return {
+    amount: '500000',
+    createdAt: '2026-09-04T00:00:00.000Z',
+    deletedAt: null,
+    description: 'Mandiri to GoPay',
+    destinationWalletArchivedAt: null,
+    destinationWalletId: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+    destinationWalletName: 'GoPay',
+    feeAmount: '1000',
+    id: 'dddddddd-dddd-dddd-dddd-dddddddddddd',
+    kind: 'transfer',
+    notes: null,
+    occurredAt: '2026-09-03T12:00:00.000Z',
+    sourceWalletArchivedAt: null,
+    sourceWalletId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+    sourceWalletName: 'Mandiri',
+    updatedAt: '2026-09-04T00:00:00.000Z',
+    walletName: 'Mandiri to GoPay',
+    ...overrides,
+  }
+}
+
 export function createTransactionDetail(
   overrides: Partial<TransactionDetail> = {},
 ): TransactionDetail {
@@ -41,7 +68,7 @@ export function createTransactionServiceStub() {
       Promise.resolve<TransactionDetail | null>(detail),
     ),
     listTransactions: vi.fn<TransactionService['listTransactions']>(() =>
-      Promise.resolve<TransactionSummary[]>([]),
+      Promise.resolve<FinancialTransactionSummary[]>([]),
     ),
     restoreTransaction: vi.fn(() => Promise.resolve()),
     softDeleteTransaction: vi.fn(() => Promise.resolve()),

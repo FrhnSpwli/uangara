@@ -2,7 +2,7 @@
 
 ## Status and intent
 
-This document remains the conceptual model for financial schema evolution. Phase 2 implements the minimal `profiles` foundation. Phase 3 implements `wallets`, the minimal `transactions` foundation, `wallet_movements`, opening-balance RPCs, and owner-safe ledger-derived balance views. Phase 4 implements atomic income/expense creation, direct edit, soft deletion, restoration, and its minimal read model. Phase 5 transfer behavior is planned but remains unimplemented.
+This document remains the conceptual model for financial schema evolution. Phase 2 implements the minimal `profiles` foundation. Phase 3 implements `wallets`, the minimal `transactions` foundation, `wallet_movements`, opening-balance RPCs, and owner-safe ledger-derived balance views. Phase 4 implements atomic income/expense creation, direct edit, soft deletion, restoration, and its minimal read model. Phase 5 implements first-class transfers, optional transfer fees, retry-safe creation, direct edit, soft deletion/restoration, and the unified minimal read model; manual acceptance is pending.
 
 ## Relationship overview
 
@@ -88,7 +88,7 @@ Implemented Phase 3 fields:
 
 Phase 4 adds a required bounded `description` for income/expense and optional bounded `notes`. The physical columns remain nullable where necessary so existing opening-balance rows do not receive fabricated text. Phase 4 adds no transaction-level amount and no category reference: its one signed wallet movement is the authoritative amount effect, while category ownership and lifecycle remain Phase 8 decisions.
 
-Phase 5 will require the same bounded description/notes lifecycle for transfers. It will add a nullable transfer-create idempotency key with user-scoped transfer uniqueness so an ambiguous browser retry cannot create a duplicate transfer. No client supplies `user_id`; the database derives ownership from `auth.uid()`.
+Phase 5 uses the same bounded description/notes lifecycle for transfers. It adds a nullable transfer-create idempotency key with user-scoped transfer uniqueness so an ambiguous browser retry cannot create a duplicate transfer. No client supplies `user_id`; the database derives ownership from `auth.uid()`.
 
 ### `wallet_movements`
 

@@ -36,6 +36,7 @@ export interface Database {
           deleted_at: string | null
           description: string | null
           id: string
+          idempotency_key: string | null
           kind: string
           notes: string | null
           occurred_at: string
@@ -47,6 +48,7 @@ export interface Database {
           deleted_at?: string | null
           description?: string | null
           id?: string
+          idempotency_key?: string | null
           kind: string
           notes?: string | null
           occurred_at: string
@@ -58,6 +60,7 @@ export interface Database {
           deleted_at?: string | null
           description?: string | null
           id?: string
+          idempotency_key?: string | null
           kind?: string
           notes?: string | null
           occurred_at?: string
@@ -152,6 +155,31 @@ export interface Database {
         }
         Relationships: []
       }
+      transaction_feed: {
+        Row: {
+          amount: string
+          created_at: string
+          deleted_at: string | null
+          description: string | null
+          destination_wallet_archived_at: string | null
+          destination_wallet_id: string | null
+          destination_wallet_name: string | null
+          fee_amount: string
+          kind: string
+          notes: string | null
+          occurred_at: string
+          source_wallet_archived_at: string | null
+          source_wallet_id: string | null
+          source_wallet_name: string | null
+          transaction_id: string
+          updated_at: string
+          user_id: string
+          wallet_archived_at: string | null
+          wallet_id: string | null
+          wallet_name: string | null
+        }
+        Relationships: []
+      }
       wallet_balances: {
         Row: {
           archived_at: string | null
@@ -194,6 +222,19 @@ export interface Database {
         }
         Returns: string
       }
+      create_transfer: {
+        Args: {
+          p_amount: number
+          p_description: string
+          p_destination_wallet_id: string
+          p_fee: number
+          p_idempotency_key: string
+          p_notes: string | null
+          p_occurred_at: string
+          p_source_wallet_id: string
+        }
+        Returns: string
+      }
       create_wallet: {
         Args: {
           p_institution?: string | null
@@ -211,7 +252,15 @@ export interface Database {
         Args: { p_transaction_id: string }
         Returns: undefined
       }
+      restore_transfer: {
+        Args: { p_transaction_id: string }
+        Returns: undefined
+      }
       soft_delete_income_expense_transaction: {
+        Args: { p_transaction_id: string }
+        Returns: undefined
+      }
+      soft_delete_transfer: {
         Args: { p_transaction_id: string }
         Returns: undefined
       }
@@ -224,6 +273,19 @@ export interface Database {
           p_occurred_at: string
           p_transaction_id: string
           p_wallet_id: string
+        }
+        Returns: undefined
+      }
+      update_transfer: {
+        Args: {
+          p_amount: number
+          p_description: string
+          p_destination_wallet_id: string
+          p_fee: number
+          p_notes: string | null
+          p_occurred_at: string
+          p_source_wallet_id: string
+          p_transaction_id: string
         }
         Returns: undefined
       }

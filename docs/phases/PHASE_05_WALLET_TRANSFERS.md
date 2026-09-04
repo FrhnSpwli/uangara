@@ -1,6 +1,6 @@
 # Phase 5 — Wallet-to-Wallet Transfers
 
-> **Status:** Planned. Phase 5 has not started and this document authorizes no implementation by itself.
+> **Status:** Implementation and automated/linked database verification complete. Manual acceptance is pending. `PHASE 5 READY FOR MANUAL ACCEPTANCE`.
 
 ## Objective
 
@@ -312,3 +312,23 @@ After automated and linked database verification succeeds, manually verify:
 ## Definition of done
 
 Phase 5 is complete only when a reviewed forward migration, transfer RPCs, owner-safe reads, UI, documentation, and generated types satisfy this contract; all existing and new linked database tests, frontend tests, type checking, linting, formatting, production/PWA build, security/secret checks, migration-history checks, and manual acceptance pass. The phase must explicitly report actual verification results and must not start Phase 6.
+
+## Implementation record
+
+Implemented on `phase-05-wallet-transfers` on 2026-09-04:
+
+- Migration `20260904000000_add_wallet_transfers.sql` adds the transfer-create idempotency key, explicit source/destination/fee movement roles, partial uniqueness, deferred exact-shape enforcement, deterministic wallet locking, an owner-safe unified feed, and hardened create/update/delete/restore RPCs.
+- Transfer principal uses one equal negative/positive movement pair. An optional fee is a separate negative source movement and is absent when zero.
+- Transfer creation is atomic and retry-safe per owner/key. Direct edit reuses principal rows and adds, updates, or removes only the optional fee row as required. Soft delete and restore preserve existing stored movements.
+- The responsive authenticated UI provides transfer create/detail/edit/delete/restore flows and includes transfers in the existing 25-event active/deleted recent surface. Phase 6 history/search remains absent.
+
+### Verification record
+
+- TypeScript, ESLint, the targeted Phase 5 Prettier check, production build, PWA generation, Markdown links, and `git diff --check` passed.
+- Vitest passed 110 of 110 tests across 15 files.
+- The linked migration history initially showed exactly one pending migration. The dry run listed only `20260904000000_add_wallet_transfers.sql`; it applied successfully, and all five local/remote migration versions agree.
+- Linked database lint completed without schema errors. It reports three non-functional `warning extra` notices for Phase 5 loop variables used to acquire deterministic row locks, plus the two accepted Phase 4 lock-result notices.
+- The Phase 2–4 linked transactional suites passed 205 of 205 assertions. The Phase 5 transfer suite passed 66 of 66 assertions, for 271 of 271 total. Every suite used its explicit transaction/rollback, and the post-test cleanup query found zero retained fixture users, profiles, wallets, transactions, or movements.
+- Security/scope review confirmed owner-qualified relationships, RLS, RPC-only ledger mutations, no client owner parameter, ignored `.env`, no privileged credential in tracked files, and no authenticated financial runtime cache.
+
+Manual transfer acceptance remains required before Phase 5 can be marked complete. Phase 6 has not started.
