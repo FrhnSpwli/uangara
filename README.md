@@ -2,7 +2,7 @@
 
 Uangara is a personal finance application designed to show where a user's money is held and how it moves between those locations. It treats bank accounts, e-wallets, cash, and custom user-defined wallets as real financial locations rather than reducing everything to income and expense categories.
 
-> **Status:** Phases 0, 1, and 2 are complete. Phase 3 wallet management is implemented and has passed automated and linked database verification; its manual wallet journeys remain pending. Ordinary income, expense, and transfer features have not started.
+> **Status:** Phases 0–4 are complete and accepted. Phase 5 wallet transfers are next/planned; transfers and categories remain unimplemented.
 
 ## The problem
 
@@ -55,11 +55,13 @@ The repository now includes:
 - a versioned minimal `profiles` migration with owner-scoped RLS and least-privilege grants
 - user-owned wallet list, create, detail, metadata edit, opening-balance edit, archive, and restore experiences
 - a versioned wallet ledger migration with `BIGINT` movements, atomic wallet RPCs, owner-qualified foreign keys, RLS, and security-invoker balance views
-- Vitest and React Testing Library auth/wallet tests plus static migration checks
+- atomic income/expense create, edit, soft-delete, and restore operations with a minimal recent/deleted transaction experience
+- owner-scoped transaction reads, exact-one signed movements, and linked database integrity tests
+- Vitest and React Testing Library auth, wallet, and transaction tests plus static migration checks
 - ESLint and Prettier configuration
 - a generated web app manifest and service worker that precaches reviewed static shell assets only
 
-The application intentionally exposes only the Phase 3 `opening_balance` ledger workflow. It contains no ordinary income/expense creation, transfers, categories, transaction-history experience, reports, or mutable wallet balance cache.
+The application exposes the Phase 3 `opening_balance` workflow plus Phase 4 ordinary income and expense creation, correction, soft deletion, and restoration. It contains no transfers, categories, full transaction-history/search experience, reports, or mutable wallet balance cache.
 
 ## Local development
 
@@ -92,7 +94,7 @@ npm run db:test
 npm run supabase:stop
 ```
 
-Committed Supabase migrations are the schema source of truth. The matching TypeScript database type in `src/types/database.ts` includes the Phase 3 wallet ledger and read models; later schema work should retain a reviewed reproducible generation workflow.
+Committed Supabase migrations are the schema source of truth. The matching TypeScript database type in `src/types/database.ts` includes the Phase 3 wallet ledger and Phase 4 income/expense read and RPC models; later schema work should retain a reviewed reproducible generation workflow.
 
 ## Architecture direction
 
@@ -122,6 +124,7 @@ Development is organized into phases, beginning with documentation, followed by 
 - [Phase 1 — Project Setup & PWA Foundation](docs/phases/PHASE_01_PROJECT_SETUP.md)
 - [Phase 2 — Authentication & Security Foundation](docs/phases/PHASE_02_AUTH_SECURITY.md)
 - [Phase 3 — Wallet Management](docs/phases/PHASE_03_WALLET_MANAGEMENT.md)
+- [Phase 4 — Income & Expense Transactions](docs/phases/PHASE_04_INCOME_EXPENSE_TRANSACTIONS.md)
 
 ## Screenshots
 

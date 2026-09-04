@@ -34,8 +34,10 @@ export interface Database {
         Row: {
           created_at: string
           deleted_at: string | null
+          description: string | null
           id: string
           kind: string
+          notes: string | null
           occurred_at: string
           updated_at: string
           user_id: string
@@ -43,8 +45,10 @@ export interface Database {
         Insert: {
           created_at?: string
           deleted_at?: string | null
+          description?: string | null
           id?: string
           kind: string
+          notes?: string | null
           occurred_at: string
           updated_at?: string
           user_id: string
@@ -52,8 +56,10 @@ export interface Database {
         Update: {
           created_at?: string
           deleted_at?: string | null
+          description?: string | null
           id?: string
           kind?: string
+          notes?: string | null
           occurred_at?: string
           updated_at?: string
           user_id?: string
@@ -128,6 +134,24 @@ export interface Database {
       }
     }
     Views: {
+      income_expense_transactions: {
+        Row: {
+          amount: string
+          created_at: string
+          deleted_at: string | null
+          description: string | null
+          kind: string
+          notes: string | null
+          occurred_at: string
+          transaction_id: string
+          updated_at: string
+          user_id: string
+          wallet_archived_at: string | null
+          wallet_id: string
+          wallet_name: string
+        }
+        Relationships: []
+      }
       wallet_balances: {
         Row: {
           archived_at: string | null
@@ -159,6 +183,17 @@ export interface Database {
         Args: { p_wallet_id: string }
         Returns: undefined
       }
+      create_income_expense_transaction: {
+        Args: {
+          p_amount: number
+          p_description: string
+          p_kind: string
+          p_notes?: string | null
+          p_occurred_at: string
+          p_wallet_id: string
+        }
+        Returns: string
+      }
       create_wallet: {
         Args: {
           p_institution?: string | null
@@ -170,6 +205,26 @@ export interface Database {
       }
       restore_wallet: {
         Args: { p_wallet_id: string }
+        Returns: undefined
+      }
+      restore_income_expense_transaction: {
+        Args: { p_transaction_id: string }
+        Returns: undefined
+      }
+      soft_delete_income_expense_transaction: {
+        Args: { p_transaction_id: string }
+        Returns: undefined
+      }
+      update_income_expense_transaction: {
+        Args: {
+          p_amount: number
+          p_description: string
+          p_kind: string
+          p_notes?: string | null
+          p_occurred_at: string
+          p_transaction_id: string
+          p_wallet_id: string
+        }
         Returns: undefined
       }
       update_wallet_opening_balance: {

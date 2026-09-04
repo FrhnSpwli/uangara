@@ -1,6 +1,6 @@
 # Roadmap
 
-This roadmap sequences the intended MVP work. Only a phase explicitly requested by the user is authorized for implementation. Phase 0–3 have detailed documents; later phases remain intentionally high-level until their prerequisites and designs are resolved.
+This roadmap sequences the intended MVP work. Only a phase explicitly requested by the user is authorized for implementation. Phases 0–4 are complete and accepted; Phase 5 is next/planned, while later phases remain intentionally high-level until their prerequisites and designs are resolved.
 
 ## Phase 0 — Foundation & Documentation
 
@@ -38,12 +38,25 @@ Detailed plan: [Phase 2](phases/PHASE_02_AUTH_SECURITY.md)
 
 Detailed plan: [Phase 3](phases/PHASE_03_WALLET_MANAGEMENT.md)
 
+### Future wallet UX backlog
+
+The current wallet view is functionally accepted. A future UX refinement may consider:
+
+- visual grouping using the existing \`wallet.type\` taxonomy: \`bank\`, \`e_wallet\`, \`e_money\`, \`cash\`, and \`other\`;
+- wallet-type-specific visual accents or icons;
+- semantic presentation for positive, zero, and negative balances;
+- accessibility that does not communicate meaning through color alone.
+
+This is a presentation backlog item only. It does not introduce a new wallet-category data model. Saving goals remain separate future work.
+
 ## Phase 4 — Income & Expense Transactions
 
 - **Objective:** Record wealth-changing transactions against wallets.
-- **Major deliverables:** Transaction and movement schema implementing integer amounts and the locked lifecycle/time semantics, validated atomic writes, income/expense UI, and balance derivation.
-- **Dependencies:** Phase 3 and the remaining category and transaction-shape decisions needed for scope.
+- **Major deliverables:** Transaction/movement schema extensions implementing the locked lifecycle/time semantics, validated atomic writes, minimal income/expense UI, and ledger-derived balance updates.
+- **Dependencies:** Accepted Phase 3 wallet/ledger foundation and the income/expense decisions locked by the Phase 4 contract. Categories remain deferred to Phase 8.
 - **Definition of done:** Valid income and expense events produce correct movements and balances, with ownership and rollback tests passing.
+
+Detailed plan: [Phase 4](phases/PHASE_04_INCOME_EXPENSE_TRANSACTIONS.md)
 
 ## Phase 5 — Wallet-to-Wallet Transfers
 

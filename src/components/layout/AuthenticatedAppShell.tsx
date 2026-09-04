@@ -48,12 +48,20 @@ export function AuthenticatedAppShell() {
               </span>
             </Link>
             <nav aria-label="Application navigation">
-              <Link
-                className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
-                to="/app/wallets"
-              >
-                Wallets
-              </Link>
+              <div className="flex items-center gap-1">
+                <Link
+                  className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                  to="/app/wallets"
+                >
+                  Wallets
+                </Link>
+                <Link
+                  className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                  to="/app/transactions"
+                >
+                  Transactions
+                </Link>
+              </div>
             </nav>
           </div>
           <button

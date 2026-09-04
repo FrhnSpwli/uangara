@@ -15,15 +15,23 @@ export function AuthenticatedHomePage() {
       </h1>
       <p className="mt-4 max-w-2xl leading-7 text-slate-600">
         Create wallets for the bank accounts, e-wallets, cash, and other places
-        where you hold money. Ordinary transactions and transfers remain for
-        later phases.
+        where you hold money, then record ordinary income and expenses.
+        Transfers remain for a later phase.
       </p>
-      <Link
-        className="bg-brand-700 hover:bg-brand-800 mt-7 inline-flex min-h-11 items-center rounded-xl px-4 py-2.5 text-sm font-semibold text-white"
-        to="/app/wallets"
-      >
-        View wallets
-      </Link>
+      <div className="mt-7 flex flex-wrap gap-3">
+        <Link
+          className="bg-brand-700 hover:bg-brand-800 inline-flex min-h-11 items-center rounded-xl px-4 py-2.5 text-sm font-semibold text-white"
+          to="/app/wallets"
+        >
+          View wallets
+        </Link>
+        <Link
+          className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-100"
+          to="/app/transactions"
+        >
+          View transactions
+        </Link>
+      </div>
       {session?.user.email ? (
         <p className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-600">
           Signed in as{' '}
