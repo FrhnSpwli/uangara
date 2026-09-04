@@ -1,6 +1,6 @@
 # Roadmap
 
-This roadmap sequences the intended MVP work. Only a phase explicitly requested by the user is authorized for implementation. Phases 0–4 have detailed documents; later phases remain intentionally high-level until their prerequisites and designs are resolved.
+This roadmap sequences the intended MVP work. Only a phase explicitly requested by the user is authorized for implementation. Phases 0–4 are complete and accepted; Phase 5 is next/planned, while later phases remain intentionally high-level until their prerequisites and designs are resolved.
 
 ## Phase 0 — Foundation & Documentation
 
@@ -37,6 +37,17 @@ Detailed plan: [Phase 2](phases/PHASE_02_AUTH_SECURITY.md)
 - **Definition of done:** Users can securely manage only their own custom wallets and opening positions without compromising ledger semantics.
 
 Detailed plan: [Phase 3](phases/PHASE_03_WALLET_MANAGEMENT.md)
+
+### Future wallet UX backlog
+
+The current wallet view is functionally accepted. A future UX refinement may consider:
+
+- visual grouping using the existing \`wallet.type\` taxonomy: \`bank\`, \`e_wallet\`, \`e_money\`, \`cash\`, and \`other\`;
+- wallet-type-specific visual accents or icons;
+- semantic presentation for positive, zero, and negative balances;
+- accessibility that does not communicate meaning through color alone.
+
+This is a presentation backlog item only. It does not introduce a new wallet-category data model. Saving goals remain separate future work.
 
 ## Phase 4 — Income & Expense Transactions
 

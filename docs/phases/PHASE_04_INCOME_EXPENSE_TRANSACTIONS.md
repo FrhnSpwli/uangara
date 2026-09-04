@@ -2,9 +2,9 @@
 
 ## Status
 
-`PHASE 4 READY FOR MANUAL ACCEPTANCE`
+`PHASE 4 ACCEPTANCE CRITERIA SATISFIED`
 
-Phase 4 is implemented on `phase-04-income-expense` and has passed local quality gates, linked migration verification, and 205 linked database assertions. The manual acceptance journeys in this document remain pending. Phase 5 transfers, Phase 6 full history/search, and Phase 8 categories remain unstarted.
+Phase 4 is implemented, automated and linked-database verified, manually accepted, and closed on `phase-04-income-expense`. The manual acceptance user reported no blocking issues. Phase 5 transfers, Phase 6 full history/search, and Phase 8 categories remain unstarted.
 
 ## Objective
 
@@ -516,10 +516,10 @@ Phase 4 is ready for manual acceptance only when all applicable criteria below a
 - [x] Existing Phase 2/3 and new Phase 4 database suites pass with recorded linked assertion counts and rollback
 - [x] Frontend tests and all quality/build/PWA gates pass with actual results
 - [x] Secret, cache, scope, and documentation-link audits pass
-- [ ] Manual acceptance completed and results recorded
+- [x] Manual acceptance completed and results recorded
 - [x] No Phase 5 transfer, Phase 6 full history/search, or Phase 8 category implementation introduced
 
-Until every applicable item is complete and verified, Phase 4 must not be marked complete. Planning completion alone does not start implementation.
+All Phase 4 acceptance criteria are now complete. Phase 5 remains a separate, not-yet-started phase.
 
 ## Implementation record
 
@@ -547,4 +547,6 @@ Verified on 2026-09-02:
 - Secret and scope audits confirmed that `.env` is ignored and untracked; no service-role key, database password, CLI token, or secret-like committed value exists; no financial runtime cache, dependency change, transfer feature, or category schema was introduced.
 - All 41 local Markdown links resolved, and `git diff --check` passed.
 
-Manual acceptance remains required before Phase 4 can be marked accepted or complete.
+### Manual acceptance record
+
+Manual acceptance was completed successfully after the automated and linked database verification. The user verified the documented income/expense transaction journeys and reported no blocking issues. Phase 4 is accepted and closed; transfers remain Phase 5 and categories remain later scope.

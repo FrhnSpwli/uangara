@@ -2,7 +2,7 @@
 
 Uangara is a personal finance application designed to show where a user's money is held and how it moves between those locations. It treats bank accounts, e-wallets, cash, and custom user-defined wallets as real financial locations rather than reducing everything to income and expense categories.
 
-> **Status:** Phases 0–3 are complete and accepted. Phase 4 income and expense transactions are implemented and automated verification has passed; manual acceptance is pending. Transfers remain unimplemented and Phase 5 has not started.
+> **Status:** Phases 0–4 are complete and accepted. Phase 5 wallet transfers are next/planned; transfers and categories remain unimplemented.
 
 ## The problem
 
