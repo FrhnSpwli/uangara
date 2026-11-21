@@ -1,6 +1,6 @@
 # Phase 5 — Wallet-to-Wallet Transfers
 
-> **Status:** Implementation and automated/linked database verification complete. Manual acceptance is pending. `PHASE 5 READY FOR MANUAL ACCEPTANCE`.
+> **Status:** Phase 5 was accepted and merged into `main`. The transfer discoverability correction is a follow-up change awaiting review; it does not change the transfer implementation.
 
 ## Objective
 
@@ -331,4 +331,4 @@ Implemented on `phase-05-wallet-transfers` on 2026-09-04:
 - The Phase 2–4 linked transactional suites passed 205 of 205 assertions. The Phase 5 transfer suite passed 66 of 66 assertions, for 271 of 271 total. Every suite used its explicit transaction/rollback, and the post-test cleanup query found zero retained fixture users, profiles, wallets, transactions, or movements.
 - Security/scope review confirmed owner-qualified relationships, RLS, RPC-only ledger mutations, no client owner parameter, ignored `.env`, no privileged credential in tracked files, and no authenticated financial runtime cache.
 
-Manual transfer acceptance remains required before Phase 5 can be marked complete. Phase 6 has not started.
+The user subsequently confirmed that Phase 5 was accepted and merged. This follow-up adds a direct transfer entry on the authenticated homepage and corrects outdated homepage copy; it does not alter transfer RPCs or ledger behavior.

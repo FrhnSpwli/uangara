@@ -15,8 +15,8 @@ export function AuthenticatedHomePage() {
       </h1>
       <p className="mt-4 max-w-2xl leading-7 text-slate-600">
         Create wallets for the bank accounts, e-wallets, cash, and other places
-        where you hold money, then record ordinary income and expenses.
-        Transfers remain for a later phase.
+        where you hold money, record income and expenses, and transfer money
+        between your wallets.
       </p>
       <div className="mt-7 flex flex-wrap gap-3">
         <Link
@@ -30,6 +30,12 @@ export function AuthenticatedHomePage() {
           to="/app/transactions"
         >
           View transactions
+        </Link>
+        <Link
+          className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-100"
+          to="/app/transfers/new"
+        >
+          Transfer money
         </Link>
       </div>
       {session?.user.email ? (

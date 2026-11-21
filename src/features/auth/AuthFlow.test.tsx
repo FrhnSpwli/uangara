@@ -56,6 +56,12 @@ describe('authentication flow', () => {
         name: 'Your money locations start here.',
       }),
     ).toBeInTheDocument()
+    expect(
+      screen.getByRole('link', { name: 'Transfer money' }),
+    ).toHaveAttribute('href', '/app/transfers/new')
+    expect(
+      screen.queryByText(/transfers remain for a later phase/i),
+    ).not.toBeInTheDocument()
   })
 
   it('submits sign-in credentials and enters the protected route', async () => {
