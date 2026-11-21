@@ -5,14 +5,13 @@
 ## Handoff metadata
 
 - **Last updated:** 2026-11-22
-- **Current working branch:** `phase-05-wallet-transfers`
-- **Branch upstream:** `origin/phase-05-wallet-transfers`
-- **Accepted `main` baseline:** `ed0d8465441d9851803fa1b45a267eef1bb1d96a`
+- **Current working branch:** `phase-05-transfer-discoverability`
+- **Accepted `main` baseline:** `d3c6ad89e623e85322df1b61bc6329ec2d26a035`
 - **Phase 5 planning commit:** `8fa5c4132dcf582cad3ab590a91680b630e5ba0c`
 - **Phase 5 implementation commit:** `5261e3163572d0003016288b94d8de8f9ccca24a`
-- **Current phase state:** `PHASE 5 READY FOR MANUAL ACCEPTANCE`
-- **Next permitted action:** complete and record Phase 5 manual acceptance when the user authorizes or reports it
-- **Not authorized:** Phase 6 implementation, merging Phase 5, or creating a Phase 5 pull request unless the user explicitly requests it
+- **Current phase state:** Phase 5 accepted and merged; a separate discoverability follow-up awaits review
+- **Next permitted action:** review the Phase 5 discoverability follow-up
+- **Not authorized:** merging this follow-up without the user's review
 - **Production Auth action required:** set the Supabase Site URL to `https://uangara.vercel.app` and allow-list `https://uangara.vercel.app/auth/sign-in?confirmed=true`, then request a new confirmation email
 
 ## Start here
@@ -41,7 +40,7 @@ Uangara is a TypeScript-first personal-finance PWA that answers where a user's m
 | 2 — Authentication & Security | Complete and accepted | Supabase Auth, protected routes, profiles, RLS, and ownership verification |
 | 3 — Wallet Management | Complete and accepted | Wallet lifecycle, opening balances, ledger foundation, balances, provider presets |
 | 4 — Income & Expense | Complete and accepted | Atomic income/expense create, edit, soft delete, restore, and minimal visibility |
-| 5 — Wallet Transfers | Implemented; automated and linked DB verification passed; manual acceptance pending | Atomic transfers, optional fees, edit/delete/restore, idempotency, and unified recent feed |
+| 5 — Wallet Transfers | Complete and accepted | Atomic transfers, optional fees, edit/delete/restore, idempotency, and unified recent feed |
 | 6+ | Not started | Must be separately planned/authorized |
 
 The detailed Phase 5 contract and implementation record are in [`docs/phases/PHASE_05_WALLET_TRANSFERS.md`](docs/phases/PHASE_05_WALLET_TRANSFERS.md).
@@ -159,7 +158,7 @@ Production email confirmation configuration currently requires a remote Supabase
 
 The application now safely explains expired/invalid callback errors and strips their URL fragment, and Vercel direct-route rewrites are present. The dashboard setting itself is remote configuration and was not changed by this repository update.
 
-Phase 5 still needs genuine manual acceptance. Verify at least:
+The Phase 5 manual acceptance checklist covered these journeys:
 
 1. A normal transfer debits and credits the two wallets without changing total wealth.
 2. A fee reduces source balance and total wealth by exactly the fee.
@@ -172,7 +171,7 @@ Phase 5 still needs genuine manual acceptance. Verify at least:
 9. PWA installability remains intact.
 10. A practical retry/double-submit does not create duplicate transfers.
 
-Only after the user reports or authorizes genuine manual acceptance should documentation be changed to `PHASE 5 ACCEPTANCE CRITERIA SATISFIED`. Do not infer acceptance from automated checks.
+The user subsequently confirmed that Phase 5 manual acceptance passed and the original Phase 5 PR was merged. The discoverability follow-up is separate and must not be treated as merged before review.
 
 ## Deliberately deferred
 
@@ -227,6 +226,7 @@ Keep the recent-update list concise—retain roughly the latest ten material ent
 
 ## Recent handoff updates
 
+- **2026-11-22 — Phase 5 discoverability follow-up:** Added a direct authenticated homepage entry to the existing transfer flow and corrected stale Phase 5 acceptance wording. The follow-up awaits review; transfer backend behavior is unchanged.
 - **2026-11-22 — Production email confirmation hardening:** Added Vercel SPA rewrites, safe expired/invalid confirmation callback handling, regression tests, and exact Supabase production URL instructions. Remote Supabase URL Configuration still requires the documented dashboard change and a newly issued email.
 - **2026-11-22 — AI handoff contract:** Created this cross-model project briefing and made synchronization mandatory through `AGENTS.md`. No application, database, dependency, migration, or remote Supabase behavior changed.
-- **2026-09-04 — Phase 5 implementation:** Added atomic wallet transfers, optional source fees, retry-safe creation, direct edit, soft delete/restore, unified recent visibility, and linked verification totaling 271/271 database assertions. Manual acceptance remains pending.
+- **2026-09-04 — Phase 5 implementation:** Added atomic wallet transfers, optional source fees, retry-safe creation, direct edit, soft delete/restore, unified recent visibility, and linked verification totaling 271/271 database assertions. The user later confirmed manual acceptance and merge.
