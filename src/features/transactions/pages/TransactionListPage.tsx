@@ -4,14 +4,23 @@ import { Link } from 'react-router'
 import { formatMoney } from '../../../utils/money'
 import { useTransactionService } from '../context/useTransactionService'
 import { getTransactionErrorMessage } from '../services/transaction-errors'
-import type { TransactionListMode, TransactionSummary } from '../types'
+import type { FinancialTransactionSummary, TransactionListMode } from '../types'
 
 const occurredAtFormatter = new Intl.DateTimeFormat('id-ID', {
   dateStyle: 'medium',
   timeStyle: 'short',
 })
 
-function signedAmount(transaction: TransactionSummary) {
+function displayAmount(transaction: FinancialTransactionSummary) {
+  if (transaction.kind === 'transfer') {
+    return transaction.feeAmount === '0'
+      ? formatMoney(transaction.amount)
+      : formatMoney(transaction.amount) +
+          ' + ' +
+          formatMoney(transaction.feeAmount) +
+          ' fee'
+  }
+
   const prefix = transaction.kind === 'income' ? '+' : '−'
   return `${prefix}${formatMoney(transaction.amount)}`
 }
@@ -19,7 +28,9 @@ function signedAmount(transaction: TransactionSummary) {
 export function TransactionListPage() {
   const service = useTransactionService()
   const [mode, setMode] = useState<TransactionListMode>('active')
-  const [transactions, setTransactions] = useState<TransactionSummary[]>([])
+  const [transactions, setTransactions] = useState<
+    FinancialTransactionSummary[]
+  >([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [reloadKey, setReloadKey] = useState(0)
@@ -67,14 +78,14 @@ export function TransactionListPage() {
       <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-brand-700 text-sm font-semibold tracking-wide uppercase">
-            Wealth changes
+            Money movement
           </p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
             Transactions
           </h1>
           <p className="mt-2 max-w-2xl leading-7 text-slate-600">
-            Recent income and expenses. Full history and search arrive in a
-            later phase.
+            Recent income, expenses, and transfers. Full history and search
+            arrive in a later phase.
           </p>
         </div>
         <Link
@@ -82,6 +93,12 @@ export function TransactionListPage() {
           to="/app/transactions/new"
         >
           Add transaction
+        </Link>
+        <Link
+          className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+          to="/app/transfers/new"
+        >
+          Transfer money
         </Link>
       </div>
 
@@ -150,7 +167,11 @@ export function TransactionListPage() {
             <li key={transaction.id}>
               <Link
                 className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-teal-300 hover:shadow-md sm:flex-row sm:items-center sm:justify-between"
-                to={`/app/transactions/${transaction.id}`}
+                to={
+                  transaction.kind === 'transfer'
+                    ? '/app/transfers/' + transaction.id
+                    : '/app/transactions/' + transaction.id
+                }
               >
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -174,10 +195,12 @@ export function TransactionListPage() {
                   className={`text-lg font-bold ${
                     transaction.kind === 'income'
                       ? 'text-teal-700'
-                      : 'text-rose-700'
+                      : transaction.kind === 'expense'
+                        ? 'text-rose-700'
+                        : 'text-slate-700'
                   }`}
                 >
-                  {signedAmount(transaction)}
+                  {displayAmount(transaction)}
                 </p>
               </Link>
             </li>

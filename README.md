@@ -2,7 +2,7 @@
 
 Uangara is a personal finance application designed to show where a user's money is held and how it moves between those locations. It treats bank accounts, e-wallets, cash, and custom user-defined wallets as real financial locations rather than reducing everything to income and expense categories.
 
-> **Status:** Phases 0–4 are complete and accepted. Phase 5 wallet transfers are next/planned; transfers and categories remain unimplemented.
+> **Status:** Phases 0–4 are complete and accepted. Phase 5 wallet transfers are implemented and have passed automated and linked-database verification; manual acceptance is pending. Phase 6 has not started.
 
 ## The problem
 
@@ -57,11 +57,13 @@ The repository now includes:
 - a versioned wallet ledger migration with `BIGINT` movements, atomic wallet RPCs, owner-qualified foreign keys, RLS, and security-invoker balance views
 - atomic income/expense create, edit, soft-delete, and restore operations with a minimal recent/deleted transaction experience
 - owner-scoped transaction reads, exact-one signed movements, and linked database integrity tests
-- Vitest and React Testing Library auth, wallet, and transaction tests plus static migration checks
+- atomic wallet-to-wallet transfer create, edit, soft-delete, and restore operations with optional expense-like fees and retry-safe creation
+- owner-scoped transfer reads, exact transfer movement shapes, and a unified minimal recent/deleted financial-event surface
+- Vitest and React Testing Library auth, wallet, transaction, and transfer tests plus static migration checks
 - ESLint and Prettier configuration
 - a generated web app manifest and service worker that precaches reviewed static shell assets only
 
-The application exposes the Phase 3 `opening_balance` workflow plus Phase 4 ordinary income and expense creation, correction, soft deletion, and restoration. It contains no transfers, categories, full transaction-history/search experience, reports, or mutable wallet balance cache.
+The application exposes the Phase 3 `opening_balance` workflow, Phase 4 ordinary income/expense lifecycle, and the Phase 5 transfer lifecycle. Phase 5 still requires manual acceptance. It contains no categories, full transaction-history/search experience, reports, or mutable wallet balance cache.
 
 ## Local development
 
@@ -73,6 +75,17 @@ npm run dev
 ```
 
 Copy `.env.example` to `.env` and replace its placeholders with a Supabase project URL and browser-safe publishable key. Authentication requires these values. Never place a secret key, service-role key, or database password in a `VITE_*` variable.
+
+### Production authentication URLs
+
+The production Supabase project must be configured under **Authentication → URL Configuration** with:
+
+- **Site URL:** `https://uangara.vercel.app`
+- **Redirect URL:** `https://uangara.vercel.app/auth/sign-in?confirmed=true`
+
+Keep required localhost callbacks as additional development redirect URLs. The application passes its current browser origin to Supabase, while Supabase independently requires the complete callback to be allow-listed. If the callback is not allowed, Supabase can fall back to its Site URL; a stale localhost Site URL therefore sends production confirmation emails to localhost.
+
+The repository's `vercel.json` routes direct SPA requests, including the confirmation callback, through `index.html`. Generate a new confirmation email after changing Supabase settings because previously issued links keep their original redirect and may already be expired.
 
 Available quality commands:
 
@@ -94,7 +107,7 @@ npm run db:test
 npm run supabase:stop
 ```
 
-Committed Supabase migrations are the schema source of truth. The matching TypeScript database type in `src/types/database.ts` includes the Phase 3 wallet ledger and Phase 4 income/expense read and RPC models; later schema work should retain a reviewed reproducible generation workflow.
+Committed Supabase migrations are the schema source of truth. The matching TypeScript database type in `src/types/database.ts` includes the wallet ledger, income/expense, and transfer read/RPC models; later schema work should retain a reviewed reproducible generation workflow.
 
 ## Architecture direction
 
@@ -112,6 +125,7 @@ Development is organized into phases, beginning with documentation, followed by 
 
 ## Documentation
 
+- [AI/model project handoff](PROJECT_HANDOFF.md)
 - [Product definition](docs/PRODUCT.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Financial domain rules](docs/DOMAIN_RULES.md)
@@ -125,6 +139,8 @@ Development is organized into phases, beginning with documentation, followed by 
 - [Phase 2 — Authentication & Security Foundation](docs/phases/PHASE_02_AUTH_SECURITY.md)
 - [Phase 3 — Wallet Management](docs/phases/PHASE_03_WALLET_MANAGEMENT.md)
 - [Phase 4 — Income & Expense Transactions](docs/phases/PHASE_04_INCOME_EXPENSE_TRANSACTIONS.md)
+
+- [Phase 5 — Wallet-to-Wallet Transfers](docs/phases/PHASE_05_WALLET_TRANSFERS.md)
 
 ## Screenshots
 

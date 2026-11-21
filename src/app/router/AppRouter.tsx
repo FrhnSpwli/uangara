@@ -15,6 +15,8 @@ import { NotFoundPage } from '../../features/not-found/NotFoundPage'
 import { CreateTransactionPage } from '../../features/transactions/pages/CreateTransactionPage'
 import { TransactionDetailPage } from '../../features/transactions/pages/TransactionDetailPage'
 import { TransactionListPage } from '../../features/transactions/pages/TransactionListPage'
+import { CreateTransferPage } from '../../features/transfers/pages/CreateTransferPage'
+import { TransferDetailPage } from '../../features/transfers/pages/TransferDetailPage'
 import { CreateWalletPage } from '../../features/wallets/pages/CreateWalletPage'
 import { WalletDetailPage } from '../../features/wallets/pages/WalletDetailPage'
 import { WalletListPage } from '../../features/wallets/pages/WalletListPage'
@@ -42,6 +44,11 @@ export function AppRoutes() {
           <Route
             element={<TransactionDetailPage />}
             path="transactions/:transactionId"
+          />
+          <Route element={<CreateTransferPage />} path="transfers/new" />
+          <Route
+            element={<TransferDetailPage />}
+            path="transfers/:transferId"
           />
           <Route element={<WalletListPage />} path="wallets" />
           <Route element={<CreateWalletPage />} path="wallets/new" />

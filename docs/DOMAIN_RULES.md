@@ -36,7 +36,7 @@ Purchase from GoPay: GoPay -35,000
 
 ## Transfer
 
-A transfer moves an equal principal amount between two wallets owned by the same user. It is a first-class financial operation, not an expense paired with income.
+A transfer moves an equal principal amount between two different wallets owned by the same user. It is a first-class financial operation, not an expense paired with income.
 
 ```text
 Mandiri -> GoPay: 500,000
@@ -45,11 +45,11 @@ Mandiri -500,000
 GoPay   +500,000
 ```
 
-The transfer's movements sum to zero, so the principal does not change total user wealth or income/expense reporting.
+Every active transfer has exactly one negative `transfer_source` movement and one equal positive `transfer_destination` movement. The transfer's principal movements sum to zero, so principal does not change total user wealth or income/expense reporting.
 
 ## Transfer fee
 
-A transfer fee is a real outflow and decreases total wealth. It must be represented as an expense or an explicitly expense-like movement that reports as expense; the final schema representation remains to be decided.
+A transfer fee is a real outflow and decreases total wealth. It is represented within the same transfer transaction as one optional negative `transfer_fee` movement against the source wallet. When no fee applies, no fee movement is stored; ordinary zero-value movements remain prohibited.
 
 ```text
 Mandiri -> GoPay: 500,000
@@ -61,7 +61,7 @@ Fee expense = 1,000
 Net wealth change = -1,000
 ```
 
-The fee must not be absorbed into the wealth-neutral transfer principal in a way that hides it from expense reporting.
+The fee must not be absorbed into the wealth-neutral transfer principal in a way that hides it from expense reporting. Future reporting treats the active fee movement's magnitude as expense-like while excluding the two principal movements from both income and expense totals. Transfer principal has no category; future category work may classify the fee component without reclassifying the transfer.
 
 ## Wallet movement
 
@@ -111,7 +111,7 @@ Financial records must remain internally consistent throughout their lifecycle.
 - Validate ownership of every referenced wallet and category.
 - Reject invalid amounts and invalid transaction shapes.
 - Create the transaction and all required movements in one database transaction.
-- For a transfer, reject an invalid source/destination combination and require balanced principal movements.
+- For a transfer, require distinct owned source/destination wallets, balanced principal movements, and at most one source-paid fee movement.
 - Never expose a partially created financial event.
 
 ### Edit
@@ -147,8 +147,7 @@ For Phase 4 ordinary income and expense, backdating is allowed and a future `occ
 ## Risks future phases must resolve
 
 - maximum amounts and any future currency behavior
-- exact fee linkage and categorization
-- database enforcement of the remaining future transaction shapes, including transfer balance
-- concurrent writes and idempotency for RPC operations
+- category ownership, deletion, archival, defaults, and future fee categorization
+- concurrency and recovery hardening beyond transfer-create idempotency
 
 These are open design decisions, not permission to weaken the invariants above.

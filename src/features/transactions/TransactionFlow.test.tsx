@@ -8,6 +8,7 @@ import {
   createTransactionDetail,
   createTransactionServiceStub,
   createTransactionSummary,
+  createTransferSummary,
 } from '../../test/transactions'
 import {
   createWalletServiceStub,
@@ -60,6 +61,25 @@ async function fillCreateForm(
 }
 
 describe('income and expense transaction flow', () => {
+  it('shows transfers in the minimal feed without labeling principal as income or expense', async () => {
+    const transactionService = createTransactionServiceStub()
+    const walletService = createWalletServiceStub()
+    transactionService.listTransactions.mockResolvedValue([
+      createTransferSummary(),
+    ])
+
+    renderAt('/app/transactions', transactionService, walletService)
+
+    const transfer = await screen.findByRole('link', {
+      name: /Mandiri to GoPay/i,
+    })
+    expect(transfer).toHaveAttribute(
+      'href',
+      '/app/transfers/dddddddd-dddd-dddd-dddd-dddddddddddd',
+    )
+    expect(transfer).toHaveTextContent(/fee/i)
+  })
+
   it('shows loading and empty states for recent transactions', async () => {
     const transactionService = createTransactionServiceStub()
     const walletService = createWalletServiceStub()
