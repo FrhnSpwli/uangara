@@ -2,6 +2,8 @@
 
 This file governs all work in the Uangara repository. Read it before changing the project.
 
+After this file, read [`PROJECT_HANDOFF.md`](PROJECT_HANDOFF.md). It is the mandatory current-state briefing for transferring work between agents and models. It summarizes the repository but does not override the source-of-truth order below.
+
 ## Project Mission
 
 Uangara is a personal finance application that answers where a user's money is held and how it moves. Wallets are real or conceptual money locations. Income and expense change total wealth; internal transfers do not, except for any fee. The product is planned as a TypeScript-first React PWA backed by Supabase.
@@ -39,6 +41,7 @@ The user's current explicit request overrides repository documentation. A phase 
 - Change only what the requested phase requires. Do not refactor unrelated functionality or silently implement later phases.
 - Keep migrations backward-compatible where practical. Document and explicitly plan any destructive or irreversible migration.
 - Update relevant documentation whenever an architectural, domain, security, or phase decision changes.
+- Update `PROJECT_HANDOFF.md` in the same change set whenever making a repository change. Keep its current status, implemented capabilities, verification evidence, pending work, and recent-change entry accurate. Even when a change does not alter architecture, record the change and any checks actually run. Never copy secrets or unverified claims into the handoff.
 - Preserve user changes already present in the worktree and do not fabricate implementation or verification results.
 
 ## Phase Discipline
@@ -65,5 +68,6 @@ Before declaring an implementation phase complete, run and report every relevant
 - manual acceptance criteria
 - security and ownership assumptions, including RLS where applicable
 - documentation updates
+- `PROJECT_HANDOFF.md` synchronization
 
 Report commands and actual outcomes. If a check cannot run, state why and leave the phase incomplete unless its acceptance criteria explicitly permit that limitation. Never infer or invent a passing result.

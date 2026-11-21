@@ -108,9 +108,33 @@ describe('authentication flow', () => {
     expect(service.signUp).toHaveBeenCalledWith(
       expect.objectContaining({
         email: 'new@example.test',
+        emailRedirectTo: `${window.location.origin}/auth/sign-in?confirmed=true`,
         password: 'safe-test-password',
       }),
     )
+  })
+
+  it('shows a safe expired confirmation-link error and removes the fragment', async () => {
+    const { service } = createAuthServiceStub(null)
+    window.history.replaceState(
+      null,
+      '',
+      '/auth/sign-in?confirmed=true#error=access_denied&error_code=otp_expired&error_description=provider-detail',
+    )
+
+    renderAt('/auth/sign-in?confirmed=true', service)
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'This email confirmation link is invalid or has expired.',
+    )
+    expect(screen.queryByText('provider-detail')).not.toBeInTheDocument()
+    expect(
+      screen.queryByText('Email confirmation completed. You can now sign in.'),
+    ).not.toBeInTheDocument()
+
+    await waitFor(() => {
+      expect(window.location.hash).toBe('')
+    })
   })
 
   it('signs out and returns to the guest authentication area', async () => {

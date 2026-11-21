@@ -1,15 +1,31 @@
-import { type FormEvent, useState } from 'react'
+import { type FormEvent, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 
 import { useAuth } from '../context/useAuth'
 import { getAuthErrorMessage } from '../services/auth-errors'
+import { getAuthCallbackError } from '../utils/auth-callback'
 import { getFormString } from '../utils/form-values'
 
 export function SignInPage() {
   const { signIn } = useAuth()
   const [searchParams] = useSearchParams()
+  const [callbackError] = useState(() =>
+    getAuthCallbackError(window.location.hash),
+  )
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
+
+  useEffect(() => {
+    if (!callbackError) {
+      return
+    }
+
+    window.history.replaceState(
+      window.history.state,
+      '',
+      `${window.location.pathname}${window.location.search}`,
+    )
+  }, [callbackError])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -39,7 +55,20 @@ export function SignInPage() {
         Continue to your private Uangara application area.
       </p>
 
-      {searchParams.get('confirmed') === 'true' ? (
+      {callbackError ? (
+        <div
+          className="mt-5 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800"
+          role="alert"
+        >
+          <p>{callbackError.message}</p>
+          <Link
+            className="mt-2 inline-block font-semibold underline"
+            to="/auth/sign-up"
+          >
+            Return to sign up
+          </Link>
+        </div>
+      ) : searchParams.get('confirmed') === 'true' ? (
         <p
           className="border-brand-100 bg-brand-50 mt-5 rounded-xl border p-4 text-sm text-slate-700"
           role="status"

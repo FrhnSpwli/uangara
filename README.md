@@ -76,6 +76,17 @@ npm run dev
 
 Copy `.env.example` to `.env` and replace its placeholders with a Supabase project URL and browser-safe publishable key. Authentication requires these values. Never place a secret key, service-role key, or database password in a `VITE_*` variable.
 
+### Production authentication URLs
+
+The production Supabase project must be configured under **Authentication → URL Configuration** with:
+
+- **Site URL:** `https://uangara.vercel.app`
+- **Redirect URL:** `https://uangara.vercel.app/auth/sign-in?confirmed=true`
+
+Keep required localhost callbacks as additional development redirect URLs. The application passes its current browser origin to Supabase, while Supabase independently requires the complete callback to be allow-listed. If the callback is not allowed, Supabase can fall back to its Site URL; a stale localhost Site URL therefore sends production confirmation emails to localhost.
+
+The repository's `vercel.json` routes direct SPA requests, including the confirmation callback, through `index.html`. Generate a new confirmation email after changing Supabase settings because previously issued links keep their original redirect and may already be expired.
+
 Available quality commands:
 
 ```sh
@@ -114,6 +125,7 @@ Development is organized into phases, beginning with documentation, followed by 
 
 ## Documentation
 
+- [AI/model project handoff](PROJECT_HANDOFF.md)
 - [Product definition](docs/PRODUCT.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Financial domain rules](docs/DOMAIN_RULES.md)
