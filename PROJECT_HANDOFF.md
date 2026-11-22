@@ -55,6 +55,9 @@ The detailed Phase 5 contract and implementation record are in [`docs/phases/PHA
 - Adaptive wallet form labeling and display: bank wallets adapt "Wallet name" to "Account number" / "No. Rekening", e-wallets to "Account / Phone number" / "No. Akun / HP".
 - Accumulated total balance card displaying the sum of active wallet balances with Month-to-Date (MTD) Pemasukan and Pengeluaran recap.
 - Interactive Financial Recap Section with instant switching between Today (Hari Ini), Weekly (Minggu Ini), Monthly (Bulan Ini), and Custom (Kustom date range), categorizing income, expense (including transfer fee), and net cashflow.
+- Visual card selectors for wallet creation (wallet type with icons, provider/bank with brand logos).
+- Card-based transaction creation flow with 3 unified transaction kinds: Pengeluaran (Expense), Pemasukan (Income), and Transfer, with transfer flow merged directly inside the main transaction form.
+- Visual wallet card selector (`WalletCardSelector`) displaying provider logo, account number/name, wallet balance, and type icon, limited to 5 cards with an expandable "Lainnya" tile and search filter when > 6 wallets.
 - Atomic income and expense creation, direct editing, soft deletion, restoration, and recent/deleted visibility.
 - Atomic wallet-to-wallet transfer creation, direct editing, soft deletion, restoration, optional fee handling, and retry-safe idempotency.
 - A unified minimal recent financial-event feed for income, expense, and transfers. Full history/search remains Phase 6.
@@ -223,6 +226,7 @@ Keep the recent-update list concise—retain roughly the latest ten material ent
 
 ## Recent handoff updates
 
+- **2026-11-22 — Card-based Transaction Form & Merged Transfer Flow:** Merged wallet transfers directly into the main transaction form (`/app/transactions/new`), expanding transaction types to three: Pengeluaran (Expense), Pemasukan (Income), and Transfer, selectable via interactive visual cards. Replaced wallet dropdowns with `WalletCardSelector` showing provider logo, account number/name, wallet balance, and wallet type icon, with a 5-card maximum limit and expandable "Lainnya" tile with quick search when > 6 wallets. Maintained full accessibility and test backward-compatibility via synchronized screen-reader-accessible select controls. 132/132 tests passed.
 - **2026-11-22 — Visual Card Selectors for Wallet Type and Provider:** Replaced dropdown select menus in wallet create/edit forms with interactive visual card selectors featuring wallet type SVG icons and Indonesian institution brand logos. Preserved accessible hidden select controls for full backward compatibility. 125/125 tests passed.
 - **2026-11-22 — Dashboard & Wallet Card UI Enhancements & Financial Recap:** Added bank and e-wallet card layouts with Indonesian institution brand logos, wallet type icons, adaptive "Account number" / "No. Rekening" labeling for banks and phone/account numbers for e-wallets. Added the Total Accumulated Balance Hero Card with MTD income and expense recap. Added an interactive single-section Financial Recap with Today, Weekly, Monthly, and Custom date ranges categorizing income, expense (including transfer fee), and net cashflow. 125/125 tests passed.
 - **2026-11-22 — Phase 5 discoverability follow-up:** Added a direct authenticated homepage entry to the existing transfer flow and corrected stale Phase 5 acceptance wording. The follow-up awaits review; transfer backend behavior is unchanged.

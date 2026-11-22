@@ -121,10 +121,12 @@ export function TransactionDetailPage() {
       return
     }
 
-    const result = validateTransactionForm(values)
+    const result = validateTransactionForm(values, undefined, {
+      allowTransfer: false,
+    })
     setErrors(result.valid ? {} : result.errors)
 
-    if (!result.valid) {
+    if (!result.valid || result.kind === 'transfer') {
       return
     }
 
@@ -305,6 +307,7 @@ export function TransactionDetailPage() {
             Edit transaction
           </h2>
           <TransactionForm
+            allowTransfer={false}
             errors={errors}
             kindChanged={values.kind !== transaction.kind}
             onChange={(nextValues) => {

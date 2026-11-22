@@ -1,6 +1,8 @@
-import { type FormEvent, useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { type FormEvent, useEffect, useRef, useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router'
 
+import { useTransferService } from '../../transfers/context/useTransferService'
+import { getTransferErrorMessage } from '../../transfers/services/transfer-errors'
 import { useWalletService } from '../../wallets/context/useWalletService'
 import { getWalletErrorMessage } from '../../wallets/services/wallet-errors'
 import { TransactionForm } from '../components/TransactionForm'
@@ -14,28 +16,45 @@ import {
   validateTransactionForm,
 } from '../utils/validation'
 
-function initialValues(): TransactionFormValues {
+interface SubmissionAttempt {
+  fingerprint: string
+  key: string
+}
+
+function initialValues(kind = 'expense'): TransactionFormValues {
   return {
     amount: '',
     description: '',
-    kind: 'expense',
+    destinationWalletId: '',
+    fee: '0',
+    kind,
     notes: '',
     occurredAt: toLocalDateTimeValue(new Date()),
+    sourceWalletId: '',
     walletId: '',
   }
 }
 
 export function CreateTransactionPage() {
+  const [searchParams] = useSearchParams()
+  const initialKind =
+    searchParams.get('type') === 'transfer' ? 'transfer' : 'expense'
+
   const transactionService = useTransactionService()
+  const transferService = useTransferService()
   const walletService = useWalletService()
   const navigate = useNavigate()
-  const [values, setValues] = useState<TransactionFormValues>(initialValues)
+
+  const [values, setValues] = useState<TransactionFormValues>(() =>
+    initialValues(initialKind),
+  )
   const [wallets, setWallets] = useState<TransactionWalletOption[]>([])
   const [walletsLoading, setWalletsLoading] = useState(true)
   const [walletsError, setWalletsError] = useState<string | null>(null)
   const [errors, setErrors] = useState<TransactionFormErrors>({})
   const [requestError, setRequestError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
+  const attempt = useRef<SubmissionAttempt | null>(null)
 
   useEffect(() => {
     let active = true
@@ -47,8 +66,11 @@ export function CreateTransactionPage() {
           setWallets(
             result.map((wallet) => ({
               archivedAt: wallet.archivedAt,
+              balance: wallet.balance,
               id: wallet.id,
+              institution: wallet.institution,
               name: wallet.name,
+              type: wallet.type,
             })),
           )
         }
@@ -83,12 +105,34 @@ export function CreateTransactionPage() {
     setPending(true)
 
     try {
-      const transactionId = await transactionService.createTransaction(
-        result.input,
-      )
-      await navigate(`/app/transactions/${transactionId}`, { replace: true })
+      if (result.kind === 'transfer') {
+        const payloadFingerprint = JSON.stringify(result.input)
+        if (
+          !attempt.current ||
+          attempt.current.fingerprint !== payloadFingerprint
+        ) {
+          attempt.current = {
+            fingerprint: payloadFingerprint,
+            key: crypto.randomUUID(),
+          }
+        }
+        const transferId = await transferService.createTransfer(
+          result.input,
+          attempt.current.key,
+        )
+        await navigate(`/app/transfers/${transferId}`, { replace: true })
+      } else {
+        const transactionId = await transactionService.createTransaction(
+          result.input,
+        )
+        await navigate(`/app/transactions/${transactionId}`, { replace: true })
+      }
     } catch (error) {
-      setRequestError(getTransactionErrorMessage(error))
+      setRequestError(
+        result.kind === 'transfer'
+          ? getTransferErrorMessage(error)
+          : getTransactionErrorMessage(error),
+      )
       setPending(false)
     }
   }
@@ -102,10 +146,12 @@ export function CreateTransactionPage() {
         ← Back to transactions
       </Link>
       <h1 className="mt-5 text-3xl font-bold tracking-tight text-slate-950">
-        Add transaction
+        {values.kind === 'transfer' ? 'Add transfer' : 'Add transaction'}
       </h1>
       <p className="mt-3 leading-7 text-slate-600">
-        Record one income or expense against an active wallet.
+        {values.kind === 'transfer'
+          ? 'Move money between two active wallets.'
+          : 'Record one income or expense against an active wallet.'}
       </p>
 
       {walletsLoading ? (

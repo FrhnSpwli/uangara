@@ -1,5 +1,6 @@
 import type { FormEvent } from 'react'
 
+import { WalletCardSelector } from '../../wallets/components/WalletCardSelector'
 import type { TransferWalletOption } from '../types'
 import type {
   TransferFormErrors,
@@ -15,9 +16,6 @@ interface TransferFormProps {
   values: TransferFormValues
   wallets: TransferWalletOption[]
 }
-
-const inputClass =
-  'mt-2 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-slate-950 shadow-sm disabled:bg-slate-100'
 
 export function TransferForm({
   errors,
@@ -35,91 +33,29 @@ export function TransferForm({
     onChange({ ...values, [key]: value })
   }
 
-  function walletOptions() {
-    return wallets.map((wallet) => (
-      <option key={wallet.id} value={wallet.id}>
-        {wallet.name}
-        {wallet.archivedAt ? ' (archived)' : ''}
-      </option>
-    ))
-  }
-
   return (
-    <form className="space-y-5" noValidate onSubmit={onSubmit}>
-      <div className="grid gap-4 sm:grid-cols-[1fr_auto_1fr] sm:items-end">
-        <div>
-          <label
-            className="text-sm font-semibold text-slate-800"
-            htmlFor="transfer-source"
-          >
-            Source wallet
-          </label>
-          <select
-            aria-describedby={
-              errors.sourceWalletId ? 'transfer-source-error' : undefined
-            }
-            aria-invalid={Boolean(errors.sourceWalletId)}
-            className={inputClass}
-            disabled={pending}
-            id="transfer-source"
-            onChange={(event) => update('sourceWalletId', event.target.value)}
-            value={values.sourceWalletId}
-          >
-            <option value="">Choose source</option>
-            {walletOptions()}
-          </select>
-          {errors.sourceWalletId ? (
-            <p
-              className="mt-2 text-sm text-rose-700"
-              id="transfer-source-error"
-            >
-              {errors.sourceWalletId}
-            </p>
-          ) : null}
-        </div>
+    <form className="space-y-6" noValidate onSubmit={onSubmit}>
+      <WalletCardSelector
+        disabled={pending}
+        error={errors.sourceWalletId}
+        id="transfer-source"
+        label="Source wallet"
+        onChange={(sourceId) => update('sourceWalletId', sourceId)}
+        placeholder="Choose source wallet"
+        value={values.sourceWalletId}
+        wallets={wallets}
+      />
 
-        <span
-          aria-hidden="true"
-          className="hidden pb-3 text-xl text-slate-400 sm:block"
-        >
-          &rarr;
-        </span>
-
-        <div>
-          <label
-            className="text-sm font-semibold text-slate-800"
-            htmlFor="transfer-destination"
-          >
-            Destination wallet
-          </label>
-          <select
-            aria-describedby={
-              errors.destinationWalletId
-                ? 'transfer-destination-error'
-                : undefined
-            }
-            aria-invalid={Boolean(errors.destinationWalletId)}
-            className={inputClass}
-            disabled={pending}
-            id="transfer-destination"
-            onChange={(event) =>
-              update('destinationWalletId', event.target.value)
-            }
-            value={values.destinationWalletId}
-          >
-            <option value="">Choose destination</option>
-            {walletOptions()}
-          </select>
-          {errors.destinationWalletId ? (
-            <p
-              className="mt-2 text-sm text-rose-700"
-              id="transfer-destination-error"
-            >
-              {errors.destinationWalletId}
-            </p>
-          ) : null}
-        </div>
-      </div>
+      <WalletCardSelector
+        disabled={pending}
+        error={errors.destinationWalletId}
+        id="transfer-destination"
+        label="Destination wallet"
+        onChange={(destId) => update('destinationWalletId', destId)}
+        placeholder="Choose destination wallet"
+        value={values.destinationWalletId}
+        wallets={wallets}
+      />
 
       <div>
         <label
@@ -133,7 +69,7 @@ export function TransferForm({
             errors.amount ? 'transfer-amount-error' : 'transfer-amount-help'
           }
           aria-invalid={Boolean(errors.amount)}
-          className={inputClass}
+          className="mt-2 w-full rounded-xl border border-slate-300 px-3.5 py-3 text-slate-950 shadow-sm disabled:bg-slate-100"
           disabled={pending}
           id="transfer-amount"
           inputMode="numeric"
@@ -141,8 +77,7 @@ export function TransferForm({
           value={values.amount}
         />
         <p className="mt-2 text-sm text-slate-500" id="transfer-amount-help">
-          Enter a positive whole Rupiah amount. A negative source balance is
-          allowed.
+          Enter a positive whole Rupiah amount to move between wallets.
         </p>
         {errors.amount ? (
           <p className="mt-2 text-sm text-rose-700" id="transfer-amount-error">
@@ -157,20 +92,23 @@ export function TransferForm({
           htmlFor="transfer-fee"
         >
           Admin fee{' '}
-          <span className="font-normal text-slate-500">
-            (optional, paid by source)
-          </span>
+          <span className="font-normal text-slate-500">(optional)</span>
         </label>
         <input
-          aria-describedby={errors.fee ? 'transfer-fee-error' : undefined}
+          aria-describedby={
+            errors.fee ? 'transfer-fee-error' : 'transfer-fee-help'
+          }
           aria-invalid={Boolean(errors.fee)}
-          className={inputClass}
+          className="mt-2 w-full rounded-xl border border-slate-300 px-3.5 py-3 text-slate-950 shadow-sm disabled:bg-slate-100"
           disabled={pending}
           id="transfer-fee"
           inputMode="numeric"
           onChange={(event) => update('fee', event.target.value)}
           value={values.fee}
         />
+        <p className="mt-2 text-sm text-slate-500" id="transfer-fee-help">
+          Transfer fee counts as a wealth-decreasing expense. Zero fee is valid.
+        </p>
         {errors.fee ? (
           <p className="mt-2 text-sm text-rose-700" id="transfer-fee-error">
             {errors.fee}
@@ -190,7 +128,7 @@ export function TransferForm({
             errors.occurredAt ? 'transfer-occurred-error' : undefined
           }
           aria-invalid={Boolean(errors.occurredAt)}
-          className={inputClass}
+          className="mt-2 w-full rounded-xl border border-slate-300 px-3.5 py-3 text-slate-950 shadow-sm disabled:bg-slate-100"
           disabled={pending}
           id="transfer-occurred-at"
           onChange={(event) => update('occurredAt', event.target.value)}
@@ -220,7 +158,7 @@ export function TransferForm({
           }
           aria-invalid={Boolean(errors.description)}
           autoComplete="off"
-          className={inputClass}
+          className="mt-2 w-full rounded-xl border border-slate-300 px-3.5 py-3 text-slate-950 shadow-sm disabled:bg-slate-100"
           disabled={pending}
           id="transfer-description"
           maxLength={120}
@@ -247,7 +185,7 @@ export function TransferForm({
         <textarea
           aria-describedby={errors.notes ? 'transfer-notes-error' : undefined}
           aria-invalid={Boolean(errors.notes)}
-          className={inputClass + ' min-h-28'}
+          className="mt-2 min-h-28 w-full rounded-xl border border-slate-300 px-3.5 py-3 text-slate-950 shadow-sm disabled:bg-slate-100"
           disabled={pending}
           id="transfer-notes"
           maxLength={1000}
@@ -266,7 +204,7 @@ export function TransferForm({
         disabled={pending}
         type="submit"
       >
-        {pending ? 'Saving transfer...' : submitLabel}
+        {pending ? 'Recording transfer…' : submitLabel}
       </button>
     </form>
   )
