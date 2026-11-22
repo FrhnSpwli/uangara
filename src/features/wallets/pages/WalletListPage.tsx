@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 
+import { AccumulatedBalanceCard } from '../components/AccumulatedBalanceCard'
+import { WalletCard } from '../components/WalletCard'
 import { useWalletService } from '../context/useWalletService'
 import { getWalletErrorMessage } from '../services/wallet-errors'
 import type { WalletListMode, WalletSummary } from '../types'
-import { formatMoney } from '../utils/money'
-import { getWalletTypeLabel } from '../utils/validation'
 
 export function WalletListPage() {
   const service = useWalletService()
@@ -75,6 +75,10 @@ export function WalletListPage() {
         </Link>
       </div>
 
+      <div className="mt-8">
+        <AccumulatedBalanceCard />
+      </div>
+
       <div
         aria-label="Wallet status"
         className="mt-8 inline-flex rounded-xl bg-slate-200 p-1"
@@ -138,30 +142,7 @@ export function WalletListPage() {
         <ul className="mt-8 grid gap-4 sm:grid-cols-2">
           {wallets.map((wallet) => (
             <li key={wallet.id}>
-              <Link
-                className="block h-full rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-teal-300 hover:shadow-md"
-                to={`/app/wallets/${wallet.id}`}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h2 className="font-semibold text-slate-950">
-                      {wallet.name}
-                    </h2>
-                    <p className="mt-1 text-sm text-slate-500">
-                      {getWalletTypeLabel(wallet.type)}
-                      {wallet.institution ? ` · ${wallet.institution}` : ''}
-                    </p>
-                  </div>
-                  {wallet.archivedAt ? (
-                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-                      Archived
-                    </span>
-                  ) : null}
-                </div>
-                <p className="mt-6 text-xl font-bold tracking-tight text-slate-950">
-                  {formatMoney(wallet.balance)}
-                </p>
-              </Link>
+              <WalletCard wallet={wallet} />
             </li>
           ))}
         </ul>

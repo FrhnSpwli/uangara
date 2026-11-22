@@ -88,7 +88,7 @@ describe('wallet management flow', () => {
       target: { value: 'bni' },
     })
 
-    expect(screen.getByLabelText('Wallet name')).toHaveValue('BNI')
+    expect(screen.getByLabelText('Account number')).toHaveValue('BNI')
     fireEvent.click(screen.getByRole('button', { name: 'Create wallet' }))
 
     await waitFor(() => {
@@ -113,7 +113,7 @@ describe('wallet management flow', () => {
       target: { value: 'gopay' },
     })
 
-    expect(screen.getByLabelText('Wallet name')).toHaveValue('GoPay')
+    expect(screen.getByLabelText('Account / Phone number')).toHaveValue('GoPay')
     fireEvent.click(screen.getByRole('button', { name: 'Create wallet' }))
 
     await waitFor(() => {
@@ -140,7 +140,7 @@ describe('wallet management flow', () => {
     })
 
     expect(screen.getByText('Provider: BNI')).toBeInTheDocument()
-    expect(screen.getByLabelText('Wallet name')).toHaveValue('TapCash')
+    expect(screen.getByLabelText('Card number / Label')).toHaveValue('TapCash')
     fireEvent.click(screen.getByRole('button', { name: 'Create wallet' }))
 
     await waitFor(() => {
@@ -189,7 +189,13 @@ describe('wallet management flow', () => {
       fireEvent.change(screen.getByLabelText(customLabel), {
         target: { value: provider },
       })
-      fireEvent.change(screen.getByLabelText('Wallet name'), {
+      const nameLabel =
+        type === 'bank'
+          ? 'Account number'
+          : type === 'e_wallet'
+            ? 'Account / Phone number'
+            : 'Card number / Label'
+      fireEvent.change(screen.getByLabelText(nameLabel), {
         target: { value: `${provider} Utama` },
       })
       fireEvent.click(screen.getByRole('button', { name: 'Create wallet' }))
@@ -214,7 +220,7 @@ describe('wallet management flow', () => {
     fireEvent.change(await screen.findByLabelText('Bank / Provider'), {
       target: { value: customProviderSelection },
     })
-    fireEvent.change(screen.getByLabelText('Wallet name'), {
+    fireEvent.change(screen.getByLabelText('Account number'), {
       target: { value: 'Custom bank wallet' },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Create wallet' }))
@@ -233,14 +239,14 @@ describe('wallet management flow', () => {
     fireEvent.change(await screen.findByLabelText('Bank / Provider'), {
       target: { value: 'bni' },
     })
-    fireEvent.change(screen.getByLabelText('Wallet name'), {
+    fireEvent.change(screen.getByLabelText('Account number'), {
       target: { value: 'BNI Payroll' },
     })
     fireEvent.change(screen.getByLabelText('Bank / Provider'), {
       target: { value: 'bca' },
     })
 
-    expect(screen.getByLabelText('Wallet name')).toHaveValue('BNI Payroll')
+    expect(screen.getByLabelText('Account number')).toHaveValue('BNI Payroll')
     fireEvent.click(screen.getByRole('button', { name: 'Create wallet' }))
 
     await waitFor(() => {
@@ -274,11 +280,11 @@ describe('wallet management flow', () => {
 
     renderAt('/app/wallets/new', service)
 
-    fireEvent.change(await screen.findByLabelText('Wallet name'), {
-      target: { value: 'Cash wallet' },
-    })
-    fireEvent.change(screen.getByLabelText('Wallet type'), {
+    fireEvent.change(await screen.findByLabelText('Wallet type'), {
       target: { value: 'cash' },
+    })
+    fireEvent.change(screen.getByLabelText('Wallet name'), {
+      target: { value: 'Cash wallet' },
     })
     expect(
       screen.getByText('Cash wallets do not need a bank or provider.'),
@@ -301,11 +307,11 @@ describe('wallet management flow', () => {
 
     renderAt('/app/wallets/new', service)
 
-    fireEvent.change(await screen.findByLabelText('Wallet name'), {
-      target: { value: 'Adjustment wallet' },
-    })
-    fireEvent.change(screen.getByLabelText('Wallet type'), {
+    fireEvent.change(await screen.findByLabelText('Wallet type'), {
       target: { value: 'other' },
+    })
+    fireEvent.change(screen.getByLabelText('Wallet name'), {
+      target: { value: 'Adjustment wallet' },
     })
     fireEvent.change(screen.getByLabelText('Opening balance'), {
       target: { value: '-50000' },
@@ -344,7 +350,7 @@ describe('wallet management flow', () => {
 
     renderAt('/app/wallets/new', service)
 
-    fireEvent.change(await screen.findByLabelText('Wallet name'), {
+    fireEvent.change(await screen.findByLabelText('Account number'), {
       target: { value: 'Invalid wallet' },
     })
     fireEvent.change(screen.getByLabelText('Opening balance'), {
@@ -368,7 +374,7 @@ describe('wallet management flow', () => {
     ).toBeInTheDocument()
     expect(screen.getByText(/calculated balance/i)).toBeInTheDocument()
 
-    fireEvent.change(screen.getByLabelText('Wallet name'), {
+    fireEvent.change(screen.getByLabelText('Account number'), {
       target: { value: 'Updated wallet' },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Save details' }))
@@ -399,7 +405,9 @@ describe('wallet management flow', () => {
     expect(screen.getByLabelText('Custom bank / provider')).toHaveValue(
       'Bank Daerah Khusus',
     )
-    expect(screen.getByLabelText('Wallet name')).toHaveValue('Payroll regional')
+    expect(screen.getByLabelText('Account number')).toHaveValue(
+      'Payroll regional',
+    )
 
     fireEvent.change(screen.getByLabelText('Custom bank / provider'), {
       target: { value: 'Bank Daerah Baru' },
@@ -431,14 +439,14 @@ describe('wallet management flow', () => {
     renderAt('/app/wallets/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', service)
 
     expect(await screen.findByLabelText('Bank / Provider')).toHaveValue('')
-    expect(screen.getByLabelText('Wallet name')).toHaveValue(
+    expect(screen.getByLabelText('Account number')).toHaveValue(
       'Legacy bank wallet',
     )
 
     fireEvent.change(screen.getByLabelText('Bank / Provider'), {
       target: { value: 'bni' },
     })
-    expect(screen.getByLabelText('Wallet name')).toHaveValue(
+    expect(screen.getByLabelText('Account number')).toHaveValue(
       'Legacy bank wallet',
     )
     fireEvent.click(screen.getByRole('button', { name: 'Save details' }))

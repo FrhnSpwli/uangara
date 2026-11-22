@@ -5,12 +5,12 @@
 ## Handoff metadata
 
 - **Last updated:** 2026-11-22
-- **Current working branch:** `phase-05-transfer-discoverability`
-- **Accepted `main` baseline:** `d3c6ad89e623e85322df1b61bc6329ec2d26a035`
+- **Current working branch:** `feat/wallet-cards-and-recap`
+- **Accepted `main` baseline:** `340b892`
 - **Phase 5 planning commit:** `8fa5c4132dcf582cad3ab590a91680b630e5ba0c`
 - **Phase 5 implementation commit:** `5261e3163572d0003016288b94d8de8f9ccca24a`
-- **Current phase state:** Phase 5 accepted and merged; a separate discoverability follow-up awaits review
-- **Next permitted action:** review the Phase 5 discoverability follow-up
+- **Current phase state:** UI enhancements, bank/e-wallet card styling, account number labeling, total balance hero, and financial recap sections implemented and verified
+- **Next permitted action:** review and explore the new dashboard and wallet UI
 - **Not authorized:** merging this follow-up without the user's review
 - **Production Auth action required:** set the Supabase Site URL to `https://uangara.vercel.app` and allow-list `https://uangara.vercel.app/auth/sign-in?confirmed=true`, then request a new confirmation email
 
@@ -51,6 +51,10 @@ The detailed Phase 5 contract and implementation record are in [`docs/phases/PHA
 - One owner-scoped profile per authenticated user.
 - Wallet list, creation, detail, metadata editing, opening-balance editing, archival, and restoration.
 - Wallet types: `bank`, `e_wallet`, `e_money`, `cash`, and `other`, with editable frontend provider presets and custom providers.
+- Modern bank & e-wallet card layouts with institution brand logos (BCA, Mandiri, BNI, BRI, Jago, SeaBank, CIMB Niaga, BTN, BSI, GoPay, DANA, OVO, ShopeePay, LinkAja), smart chip graphics, and wallet type icons.
+- Adaptive wallet form labeling and display: bank wallets adapt "Wallet name" to "Account number" / "No. Rekening", e-wallets to "Account / Phone number" / "No. Akun / HP".
+- Accumulated total balance card displaying the sum of active wallet balances with Month-to-Date (MTD) Pemasukan and Pengeluaran recap.
+- Interactive Financial Recap Section with instant switching between Today (Hari Ini), Weekly (Minggu Ini), Monthly (Bulan Ini), and Custom (Kustom date range), categorizing income, expense (including transfer fee), and net cashflow.
 - Atomic income and expense creation, direct editing, soft deletion, restoration, and recent/deleted visibility.
 - Atomic wallet-to-wallet transfer creation, direct editing, soft deletion, restoration, optional fee handling, and retry-safe idempotency.
 - A unified minimal recent financial-event feed for income, expense, and transfers. Full history/search remains Phase 6.
@@ -128,21 +132,14 @@ Important authenticated routes currently include:
 
 ## Verification snapshot
 
-The latest recorded Phase 5 verification passed:
+The latest recorded verification passed:
 
-- TypeScript: passed.
-- ESLint: passed.
-- Targeted Prettier for Phase 5 files: passed.
-- Frontend/static tests: 115/115 across 17 files after production email-confirmation hardening.
-- Production build: passed.
-- PWA generation: passed; manifest and service worker generated.
-- Markdown links: passed across 15 documentation files.
-- `git diff --check`: passed.
-- Linked database regression assertions from Phases 2–4: 205/205.
-- Linked Phase 5 database assertions: 66/66.
-- Linked total: 271/271, with transactional rollback and zero retained fixtures.
-- Remote migration history: synchronized through `20260904000000`.
-- Database lint: no schema errors; only non-functional loop-variable notices used for row locking, including previously accepted Phase 4 notices.
+- TypeScript (`tsc -b --pretty false`): passed with 0 errors.
+- ESLint (`eslint . --max-warnings 0`): passed with 0 errors and 0 warnings.
+- Prettier: formatted and verified across all changed and added files.
+- Frontend/static test suite: 125/125 passed across 21 test files with Vitest.
+- Production build (`vite build`): passed; static assets, manifest, and service worker generated.
+- `git diff --check`: passed with zero whitespace or line ending issues.
 - Secret audit: `.env` ignored; no tracked privileged credentials, database passwords, or CLI access tokens detected.
 
 Do not reuse this snapshot as proof after changing implementation. Rerun checks relevant to the new change and replace or qualify these results accurately.
@@ -226,6 +223,7 @@ Keep the recent-update list concise—retain roughly the latest ten material ent
 
 ## Recent handoff updates
 
+- **2026-11-22 — Dashboard & Wallet Card UI Enhancements & Financial Recap:** Added bank and e-wallet card layouts with Indonesian institution brand logos, wallet type icons, adaptive "Account number" / "No. Rekening" labeling for banks and phone/account numbers for e-wallets. Added the Total Accumulated Balance Hero Card with MTD income and expense recap. Added an interactive single-section Financial Recap with Today, Weekly, Monthly, and Custom date ranges categorizing income, expense (including transfer fee), and net cashflow. 125/125 tests passed.
 - **2026-11-22 — Phase 5 discoverability follow-up:** Added a direct authenticated homepage entry to the existing transfer flow and corrected stale Phase 5 acceptance wording. The follow-up awaits review; transfer backend behavior is unchanged.
 - **2026-11-22 — Production email confirmation hardening:** Added Vercel SPA rewrites, safe expired/invalid confirmation callback handling, regression tests, and exact Supabase production URL instructions. Remote Supabase URL Configuration still requires the documented dashboard change and a newly issued email.
 - **2026-11-22 — AI handoff contract:** Created this cross-model project briefing and made synchronization mandatory through `AGENTS.md`. No application, database, dependency, migration, or remote Supabase behavior changed.

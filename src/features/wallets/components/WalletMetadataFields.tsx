@@ -65,6 +65,37 @@ export function WalletMetadataFields({
     onNameSuggestion?.(preset?.suggestedName ?? '')
   }
 
+  const nameConfig = (() => {
+    switch (type) {
+      case 'bank':
+        return {
+          help: 'Enter your bank account number.',
+          label: 'Account number',
+          placeholder: 'e.g. 1234567890',
+        }
+      case 'e_wallet':
+        return {
+          help: 'Enter your phone number or account ID for this e-wallet.',
+          label: 'Account / Phone number',
+          placeholder: 'e.g. 08123456789',
+        }
+      case 'e_money':
+        return {
+          help: 'Enter your electronic money card number or card label.',
+          label: 'Card number / Label',
+          placeholder: 'e.g. 16-digit card number or Flazz Utama',
+        }
+      case 'cash':
+      case 'other':
+      default:
+        return {
+          help: 'Editable so you can distinguish multiple wallets from one provider.',
+          label: 'Wallet name',
+          placeholder: 'e.g. Everyday cash',
+        }
+    }
+  })()
+
   return (
     <>
       <div>
@@ -252,7 +283,7 @@ export function WalletMetadataFields({
           className="text-sm font-semibold text-slate-800"
           htmlFor={`${prefix}-name`}
         >
-          Wallet name
+          {nameConfig.label}
         </label>
         <input
           aria-describedby={errors.name ? `${prefix}-name-error` : undefined}
@@ -263,11 +294,12 @@ export function WalletMetadataFields({
           id={`${prefix}-name`}
           maxLength={100}
           onChange={(event) => onNameChange(event.target.value)}
+          placeholder={nameConfig.placeholder}
           required
           value={name}
         />
         <p className="mt-2 text-sm leading-6 text-slate-500">
-          Editable so you can distinguish multiple wallets from one provider.
+          {nameConfig.help}
         </p>
         {errors.name ? (
           <p className="mt-2 text-sm text-rose-700" id={`${prefix}-name-error`}>
