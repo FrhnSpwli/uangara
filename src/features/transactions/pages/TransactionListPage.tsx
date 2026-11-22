@@ -31,6 +31,40 @@ function displayAmount(
   return `${prefix}${formatMoney(transaction.amount, { hide: isHidden })}`
 }
 
+function formatTransactionWalletSubtitle(tx: FinancialTransactionSummary) {
+  if (tx.kind === 'transfer') {
+    const source =
+      tx.sourceWalletInstitution &&
+      tx.sourceWalletInstitution.trim().toLowerCase() !==
+        tx.sourceWalletName.trim().toLowerCase()
+        ? `${tx.sourceWalletInstitution} (${tx.sourceWalletName})`
+        : tx.sourceWalletName || ''
+
+    const dest =
+      tx.destinationWalletInstitution &&
+      tx.destinationWalletInstitution.trim().toLowerCase() !==
+        tx.destinationWalletName.trim().toLowerCase()
+        ? `${tx.destinationWalletInstitution} (${tx.destinationWalletName})`
+        : tx.destinationWalletName || ''
+
+    if (source && dest) {
+      return `${source} → ${dest}`
+    }
+
+    return tx.walletName
+  }
+
+  if (
+    tx.walletInstitution &&
+    tx.walletInstitution.trim().toLowerCase() !==
+      tx.walletName.trim().toLowerCase()
+  ) {
+    return `${tx.walletInstitution} (${tx.walletName})`
+  }
+
+  return tx.walletName
+}
+
 export function TransactionListPage() {
   const service = useTransactionService()
   const { isHidden } = useBalancePrivacy()
@@ -196,7 +230,7 @@ export function TransactionListPage() {
                     ) : null}
                   </div>
                   <p className="mt-1 text-sm text-slate-500">
-                    {transaction.walletName} ·{' '}
+                    {formatTransactionWalletSubtitle(transaction)} ·{' '}
                     {occurredAtFormatter.format(
                       new Date(transaction.occurredAt),
                     )}

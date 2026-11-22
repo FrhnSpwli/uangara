@@ -22,14 +22,18 @@ export interface TransferDetail {
   description: string
   destinationWalletArchivedAt: string | null
   destinationWalletId: string
+  destinationWalletInstitution?: string | null
   destinationWalletName: string
+  destinationWalletType?: WalletType | null
   feeAmount: string
   id: string
   notes: string | null
   occurredAt: string
   sourceWalletArchivedAt: string | null
   sourceWalletId: string
+  sourceWalletInstitution?: string | null
   sourceWalletName: string
+  sourceWalletType?: WalletType | null
   updatedAt: string
 }
 

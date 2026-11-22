@@ -240,8 +240,17 @@ export function TransferDetailPage() {
               {transfer.description}
             </h1>
             <p className="mt-2 text-slate-600">
-              {transfer.sourceWalletName} &rarr;{' '}
-              {transfer.destinationWalletName}
+              {transfer.sourceWalletInstitution &&
+              transfer.sourceWalletInstitution.trim().toLowerCase() !==
+                transfer.sourceWalletName.trim().toLowerCase()
+                ? `${transfer.sourceWalletInstitution} (${transfer.sourceWalletName})`
+                : transfer.sourceWalletName}{' '}
+              &rarr;{' '}
+              {transfer.destinationWalletInstitution &&
+              transfer.destinationWalletInstitution.trim().toLowerCase() !==
+                transfer.destinationWalletName.trim().toLowerCase()
+                ? `${transfer.destinationWalletInstitution} (${transfer.destinationWalletName})`
+                : transfer.destinationWalletName}
             </p>
           </div>
           {transfer.deletedAt ? (
