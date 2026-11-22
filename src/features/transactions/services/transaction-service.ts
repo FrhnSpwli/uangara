@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 import { getSupabaseClient } from '../../../lib/supabase/client'
 import type { Database } from '../../../types/database'
+import type { WalletType } from '../../wallets/types'
 import {
   transactionKinds,
   type FinancialTransactionSummary,
@@ -45,7 +46,9 @@ function toTransactionSummary(row: TransactionRow): TransactionSummary {
     updatedAt: row.updated_at,
     walletArchivedAt: row.wallet_archived_at,
     walletId: row.wallet_id,
+    walletInstitution: row.wallet_institution,
     walletName: row.wallet_name,
+    walletType: row.wallet_type as WalletType,
   }
 }
 
@@ -85,7 +88,9 @@ function toFinancialTransactionSummary(
       kind: row.kind,
       walletArchivedAt: row.wallet_archived_at,
       walletId: row.wallet_id,
+      walletInstitution: row.wallet_institution,
       walletName: row.wallet_name,
+      walletType: row.wallet_type as WalletType,
     }
   }
 
@@ -105,12 +110,16 @@ function toFinancialTransactionSummary(
     ...common,
     destinationWalletArchivedAt: row.destination_wallet_archived_at,
     destinationWalletId: row.destination_wallet_id,
+    destinationWalletInstitution: row.destination_wallet_institution,
     destinationWalletName: row.destination_wallet_name,
+    destinationWalletType: row.destination_wallet_type as WalletType,
     feeAmount: row.fee_amount,
     kind: 'transfer',
     sourceWalletArchivedAt: row.source_wallet_archived_at,
     sourceWalletId: row.source_wallet_id,
+    sourceWalletInstitution: row.source_wallet_institution,
     sourceWalletName: row.source_wallet_name,
+    sourceWalletType: row.source_wallet_type as WalletType,
     walletName: `${row.source_wallet_name} to ${row.destination_wallet_name}`,
   }
 }
@@ -151,7 +160,7 @@ export function createSupabaseTransactionService(
       let query = client
         .from('transaction_feed')
         .select(
-          'transaction_id,user_id,kind,wallet_id,wallet_name,wallet_archived_at,source_wallet_id,source_wallet_name,source_wallet_archived_at,destination_wallet_id,destination_wallet_name,destination_wallet_archived_at,category_id,category_name,category_icon,category_color,description,notes,amount,fee_amount,occurred_at,deleted_at,created_at,updated_at',
+          'transaction_id,user_id,kind,wallet_id,wallet_name,wallet_institution,wallet_type,wallet_archived_at,source_wallet_id,source_wallet_name,source_wallet_institution,source_wallet_type,source_wallet_archived_at,destination_wallet_id,destination_wallet_name,destination_wallet_institution,destination_wallet_type,destination_wallet_archived_at,category_id,category_name,category_icon,category_color,description,notes,amount,fee_amount,occurred_at,deleted_at,created_at,updated_at',
         )
         .order('occurred_at', { ascending: false })
         .order('created_at', { ascending: false })
@@ -176,7 +185,7 @@ export function createSupabaseTransactionService(
       let query = client
         .from('transaction_feed')
         .select(
-          'transaction_id,user_id,kind,wallet_id,wallet_name,wallet_archived_at,source_wallet_id,source_wallet_name,source_wallet_archived_at,destination_wallet_id,destination_wallet_name,destination_wallet_archived_at,category_id,category_name,category_icon,category_color,description,notes,amount,fee_amount,occurred_at,deleted_at,created_at,updated_at',
+          'transaction_id,user_id,kind,wallet_id,wallet_name,wallet_institution,wallet_type,wallet_archived_at,source_wallet_id,source_wallet_name,source_wallet_institution,source_wallet_type,source_wallet_archived_at,destination_wallet_id,destination_wallet_name,destination_wallet_institution,destination_wallet_type,destination_wallet_archived_at,category_id,category_name,category_icon,category_color,description,notes,amount,fee_amount,occurred_at,deleted_at,created_at,updated_at',
         )
         .is('deleted_at', null)
         .order('occurred_at', { ascending: false })
@@ -204,7 +213,7 @@ export function createSupabaseTransactionService(
       const { data, error } = await client
         .from('income_expense_transactions')
         .select(
-          'transaction_id,user_id,kind,wallet_id,wallet_name,wallet_archived_at,category_id,category_name,category_icon,category_color,description,notes,amount,occurred_at,deleted_at,created_at,updated_at',
+          'transaction_id,user_id,kind,wallet_id,wallet_name,wallet_institution,wallet_type,wallet_archived_at,category_id,category_name,category_icon,category_color,description,notes,amount,occurred_at,deleted_at,created_at,updated_at',
         )
         .eq('transaction_id', transactionId)
         .maybeSingle()

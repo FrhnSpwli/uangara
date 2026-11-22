@@ -15,12 +15,20 @@ describe('FinancialRecapSection', () => {
     service.listTransactionsByDateRange.mockResolvedValue([
       createTransactionSummary({
         amount: '2500000',
+        categoryColor: '#10b981',
+        categoryIcon: 'briefcase',
+        categoryId: 'cat-inc',
+        categoryName: 'Gaji Proyek',
         description: 'Gaji Proyek',
         id: 'tx-1',
         kind: 'income',
       }),
       createTransactionSummary({
         amount: '350000',
+        categoryColor: '#f97316',
+        categoryIcon: 'shopping-cart',
+        categoryId: 'cat-exp',
+        categoryName: 'Belanja Mingguan',
         description: 'Belanja Mingguan',
         id: 'tx-2',
         kind: 'expense',
@@ -42,8 +50,18 @@ describe('FinancialRecapSection', () => {
     expect(
       (await screen.findAllByText(/\+.*2\.500\.000/)).length,
     ).toBeGreaterThanOrEqual(1)
-    expect(screen.getByText(/-.*352\.500/)).toBeInTheDocument()
-    expect(screen.getByText('Gaji Proyek')).toBeInTheDocument()
+    expect(
+      (await screen.findAllByText(/-.*352\.500/)).length,
+    ).toBeGreaterThanOrEqual(1)
+
+    // Default chart tab is Pengeluaran, showing Belanja Mingguan and Biaya Transfer
+    expect(screen.getByText('Distribusi Kategori')).toBeInTheDocument()
+    expect(screen.getByText('Belanja Mingguan')).toBeInTheDocument()
+    expect(screen.getByText('Biaya Transfer')).toBeInTheDocument()
+
+    // Switch to Pemasukan tab
+    fireEvent.click(screen.getByRole('tab', { name: 'Pemasukan' }))
+    expect(await screen.findByText('Gaji Proyek')).toBeInTheDocument()
 
     // Period switcher buttons exist
     expect(screen.getByRole('button', { name: 'Hari Ini' })).toBeInTheDocument()

@@ -5,6 +5,7 @@ import { formatMoney } from '../../wallets/utils/money'
 import { TransactionServiceContext } from '../context/transaction-service-context'
 import type { FinancialTransactionSummary } from '../types'
 import {
+  calculateCategoryBreakdown,
   calculateRecap,
   formatDateToInput,
   getCustomRange,
@@ -13,6 +14,7 @@ import {
   getWeekRange,
   type RecapPeriod,
 } from '../utils/recap'
+import { CategoryDonutChart } from './CategoryDonutChart'
 
 export function FinancialRecapSection() {
   const service = useContext(TransactionServiceContext)
@@ -31,6 +33,7 @@ export function FinancialRecapSection() {
   const [transactions, setTransactions] = useState<
     FinancialTransactionSummary[]
   >([])
+  const [chartTab, setChartTab] = useState<'expense' | 'income'>('expense')
   const [loading, setLoading] = useState(Boolean(service))
   const [error, setError] = useState<string | null>(null)
 
@@ -96,6 +99,10 @@ export function FinancialRecapSection() {
   }, [service, dateRange])
 
   const recap = useMemo(() => calculateRecap(transactions), [transactions])
+  const breakdown = useMemo(
+    () => calculateCategoryBreakdown(transactions, chartTab),
+    [transactions, chartTab],
+  )
 
   const periodLabels: Record<RecapPeriod, string> = {
     custom: 'Kustom',
@@ -285,88 +292,66 @@ export function FinancialRecapSection() {
         </div>
       </div>
 
-      {/* Transaction List for the Period */}
+      {/* Category Breakdown & Donut Chart Section */}
       <div className="mt-8 border-t border-slate-100 pt-6">
-        <h3 className="text-sm font-semibold text-slate-900">
-          Daftar Transaksi Periode Ini ({transactions.length})
-        </h3>
-
-        {loading ? (
-          <p className="mt-3 text-xs text-slate-500" role="status">
-            Memuat transaksi…
-          </p>
-        ) : null}
-
-        {!loading && transactions.length === 0 ? (
-          <div className="mt-4 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-6 text-center text-xs text-slate-500">
-            Tidak ada transaksi pada periode{' '}
-            {periodLabels[period].toLowerCase()}.
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 className="text-base font-bold text-slate-900">
+              Distribusi Kategori
+            </h3>
+            <p className="text-xs text-slate-500">
+              Persentase dan nominal pergerakan dana berdasarkan kategori.
+            </p>
           </div>
-        ) : null}
 
-        {!loading && transactions.length > 0 ? (
-          <ul className="mt-3 divide-y divide-slate-100">
-            {transactions.map((tx) => {
-              const isIncome = tx.kind === 'income'
-              const isTransfer = tx.kind === 'transfer'
+          <div
+            aria-label="Pilih Tipe Kategori"
+            className="inline-flex self-start rounded-xl bg-slate-100 p-1 sm:self-auto"
+            role="tablist"
+          >
+            <button
+              aria-selected={chartTab === 'expense'}
+              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                chartTab === 'expense'
+                  ? 'bg-rose-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-950'
+              }`}
+              onClick={() => setChartTab('expense')}
+              role="tab"
+              type="button"
+            >
+              Pengeluaran
+            </button>
+            <button
+              aria-selected={chartTab === 'income'}
+              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                chartTab === 'income'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-950'
+              }`}
+              onClick={() => setChartTab('income')}
+              role="tab"
+              type="button"
+            >
+              Pemasukan
+            </button>
+          </div>
+        </div>
 
-              const amountColor = isIncome
-                ? 'text-emerald-700 font-semibold'
-                : isTransfer
-                  ? 'text-slate-800 font-medium'
-                  : 'text-rose-700 font-semibold'
-
-              const amountPrefix = isIncome ? '+' : isTransfer ? '' : '-'
-
-              const displayDate = new Intl.DateTimeFormat('id-ID', {
-                dateStyle: 'medium',
-                timeStyle: 'short',
-              }).format(new Date(tx.occurredAt))
-
-              return (
-                <li
-                  className="flex items-center justify-between py-3 text-xs sm:text-sm"
-                  key={tx.id}
-                >
-                  <div className="flex items-center gap-3">
-                    <span
-                      aria-hidden="true"
-                      className={`flex size-8 shrink-0 items-center justify-center rounded-xl ${
-                        isIncome
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : isTransfer
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-rose-100 text-rose-800'
-                      }`}
-                    >
-                      {isIncome ? '↓' : isTransfer ? '⇄' : '↑'}
-                    </span>
-                    <div>
-                      <p className="font-semibold text-slate-900">
-                        {tx.description}
-                      </p>
-                      <p className="text-[11px] text-slate-500">
-                        {tx.walletName} · {displayDate}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="text-right">
-                    <p className={amountColor}>
-                      {amountPrefix}
-                      {formatMoney(tx.amount, { hide: isHidden })}
-                    </p>
-                    {isTransfer && BigInt(tx.feeAmount) > 0n ? (
-                      <p className="text-[10px] text-rose-600">
-                        Biaya: {formatMoney(tx.feeAmount, { hide: isHidden })}
-                      </p>
-                    ) : null}
-                  </div>
-                </li>
-              )
-            })}
-          </ul>
-        ) : null}
+        <div className="mt-6">
+          {loading ? (
+            <p className="text-xs text-slate-500" role="status">
+              Memuat grafik kategori…
+            </p>
+          ) : (
+            <CategoryDonutChart
+              items={breakdown.items}
+              kind={chartTab}
+              totalAmount={breakdown.totalAmount}
+              totalCount={breakdown.totalCount}
+            />
+          )}
+        </div>
       </div>
     </section>
   )

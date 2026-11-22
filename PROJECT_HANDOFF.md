@@ -5,12 +5,12 @@
 ## Handoff metadata
 
 - **Last updated:** 2026-11-22
-- **Current working branch:** `feat/hide-balance-and-categories`
-- **Accepted `main` baseline:** `0c22902`
+- **Current working branch:** `feat/recap-donut-chart-and-wallet-providers`
+- **Accepted `main` baseline:** `706c160`
 - **Phase 5 planning commit:** `8fa5c4132dcf582cad3ab590a91680b630e5ba0c`
 - **Phase 5 implementation commit:** `5261e3163572d0003016288b94d8de8f9ccca24a`
-- **Current phase state:** Privacy mode (Hide Balance) and Transaction Categorization (Stage 2) implemented and verified across migrations, remote Supabase, services, components, pages, and test suites
-- **Next permitted action:** review and merge pull request #12 (Stage 1 & Stage 2) or await next user directive
+- **Current phase state:** Privacy mode (Hide Balance), Transaction Categorization (Stage 2), Category Donut Chart on Financial Recap, and Wallet Provider Display on Transaction Cards implemented and verified across migrations, remote Supabase, services, components, pages, and test suites
+- **Next permitted action:** review and merge pull request into main or await next user directive
 - **Not authorized:** merging this follow-up without the user's review
 - **Production Auth action required:** set the Supabase Site URL to `https://uangara.vercel.app` and allow-list `https://uangara.vercel.app/auth/sign-in?confirmed=true`, then request a new confirmation email
 
@@ -54,10 +54,11 @@ The detailed Phase 5 contract and implementation record are in [`docs/phases/PHA
 - Modern bank & e-wallet card layouts with institution brand logos (BCA, Mandiri, BNI, BRI, Jago, SeaBank, CIMB Niaga, BTN, BSI, GoPay, DANA, OVO, ShopeePay, LinkAja), smart chip graphics, and wallet type icons.
 - Adaptive wallet form labeling and display: bank wallets adapt "Wallet name" to "Account number" / "No. Rekening", e-wallets to "Account / Phone number" / "No. Akun / HP".
 - Accumulated total balance card displaying the sum of active wallet balances with Month-to-Date (MTD) Pemasukan and Pengeluaran recap.
-- Interactive Financial Recap Section with instant switching between Today (Hari Ini), Weekly (Minggu Ini), Monthly (Bulan Ini), and Custom (Kustom date range), categorizing income, expense (including transfer fee), and net cashflow.
+- Interactive Financial Recap Section with instant switching between Today (Hari Ini), Weekly (Minggu Ini), Monthly (Bulan Ini), and Custom (Kustom date range), categorizing income, expense (including transfer fee), and net cashflow, with an interactive pure SVG Category Donut Chart (`CategoryDonutChart`) displaying category percentage shares, nominal breakdowns, and tab switching between Pengeluaran and Pemasukan.
 - Visual card selectors for wallet creation (wallet type with icons, provider/bank with brand logos).
 - Card-based transaction creation flow with 3 unified transaction kinds: Pengeluaran (Expense), Pemasukan (Income), and Transfer, with transfer flow merged directly inside the main transaction form.
 - Visual wallet card selector (`WalletCardSelector`) displaying provider logo, account number/name, wallet balance, and type icon, limited to 5 cards with an expandable "Lainnya" tile and search filter when > 6 wallets. Consistent rich card display across create transaction, edit transaction, create transfer, and edit transfer pages.
+- Adaptive wallet provider and institution display on transaction cards in `TransactionListPage`, `TransactionDetailPage`, and `TransferDetailPage`, clearly presenting the provider alongside the account number (e.g. `ShopeePay (081241252656)`, and for transfers: `Bank Jago (109254920681) → ShopeePay (081241252656)`).
 - Unified navigation link styling ("← Back to transactions") across transaction and transfer detail and creation views.
 - Wallet clipboard sharing: integrated quick copy button on each `WalletCard` and `WalletDetailPage` to copy account number and provider with instant visual feedback, and a "Salin Semua" button (`CopyAllWalletsButton`) on the homepage and wallet list page to copy all active wallets formatted catchily and neatly for messaging apps.
 - Global Privacy Mode (Hide Balance) with instant toggle button (`BalancePrivacyToggle`) in the header navbar and Accumulated Balance Hero Card, masking financial numbers (`Rp ••••••` / `+Rp ••••••` / `-Rp ••••••`) across the dashboard, wallet cards, card selector, financial recap section, transaction list feed, and wallet/transaction detail pages, with persistent preference storage (`localStorage`).
@@ -101,6 +102,7 @@ Versioned migrations are immutable once applied:
 5. `20260904000000_add_wallet_transfers.sql`
 6. `20260905000000_add_transaction_categories.sql`
 7. `20260905010000_fix_transfer_lint.sql`
+8. `20260905020000_add_provider_to_transaction_views.sql`
 
 Core structures:
 
@@ -110,7 +112,7 @@ Core structures:
 - `transactions`: user-owned financial events with kind, optional `category_id` (FK to `categories.id` with `ON DELETE SET NULL`), timestamps, metadata, `deleted_at`, and transfer-create idempotency where applicable.
 - `wallet_movements`: signed `BIGINT` ledger effects with explicit roles and owner-qualified transaction/wallet relationships.
 - `wallet_balances`: security-invoker view summing movements from active transactions.
-- `income_expense_transactions` & `transaction_feed`: security-invoker views surfacing transaction fields alongside joined category metadata (`category_name`, `category_icon`, `category_color`).
+- `income_expense_transactions` & `transaction_feed`: security-invoker views surfacing transaction fields alongside joined category metadata (`category_name`, `category_icon`, `category_color`) and wallet institution/type metadata (`wallet_institution`, `wallet_type`, `source_wallet_institution`, `source_wallet_type`, `destination_wallet_institution`, `destination_wallet_type`).
 
 Critical financial writes are hardened `SECURITY DEFINER` RPCs with an empty/pinned search path, ownership derived from `auth.uid()`, narrow authenticated execution grants, input validation, and transactional atomicity. Relevant RPC families cover wallet/opening-balance lifecycle, income/expense lifecycle, and transfer lifecycle. Consult the migrations and [`src/types/database.ts`](src/types/database.ts) for exact signatures.
 
@@ -147,8 +149,8 @@ The latest recorded verification passed:
 - TypeScript (`tsc -b --pretty false`): passed with 0 errors.
 - ESLint (`eslint . --max-warnings 0`): passed with 0 errors and 0 warnings.
 - Prettier: formatted and verified across all changed and added files.
-- Frontend/static test suite: 171/171 passed across 30 test files with Vitest.
-- Supabase remote migration & lint: applied up through `20260905010000`, remote database lint passed with 0 errors.
+- Frontend/static test suite: 176/176 passed across 31 test files with Vitest.
+- Supabase remote migration & lint: applied up through `20260905020000`, remote database lint passed with 0 errors.
 - Production build (`vite build`): passed; static assets, manifest, and service worker generated.
 - `git diff --check`: passed with zero whitespace or line ending issues.
 - Secret audit: `.env` ignored; no tracked privileged credentials, database passwords, or CLI access tokens detected.
@@ -234,6 +236,7 @@ Keep the recent-update list concise—retain roughly the latest ten material ent
 
 ## Recent handoff updates
 
+- **2026-11-22 — Category Donut Chart on Financial Recap & Wallet Provider Display on Transaction Cards:** Added pure lightweight SVG `CategoryDonutChart` into `FinancialRecapSection` with sub-tab toggling for Pengeluaran (Expense, factoring transfer fees) and Pemasukan (Income), visual progress bars, percentage breakdown, and privacy-mode masked center totals. Added remote database migration `20260905020000_add_provider_to_transaction_views.sql` enhancing `transaction_feed` and `income_expense_transactions` views with source and destination wallet institution and type. Updated transaction cards in `TransactionListPage`, `TransactionDetailPage`, and `TransferDetailPage` to display wallet institution names alongside account numbers (`ShopeePay (081241252656)`, `Bank Jago (109254920681) → ShopeePay (081241252656)`). Verified with 176/176 tests passing across 31 test files, TypeScript 0 errors, ESLint 0 warnings, Prettier clean, remote Supabase migration pushed and linted with 0 errors, and production build succeeded.
 - **2026-11-22 — Wallet Edit View Consistency, Back Navigation Alignment & Wallet Copy Features:** Resolved wallet card option mapping in `TransactionDetailPage` and `TransferDetailPage` so wallet selection displays full institution brand logos, provider names, and balances matching `CreateTransactionPage`. Standardized transfer back-navigation link to `← Back to transactions` with matching emerald typography. Added single wallet account number and provider copy button on `WalletCard` and `WalletDetailPage`, and added `CopyAllWalletsButton` on `AuthenticatedHomePage` and `WalletListPage` to copy all accounts with clean emojis, labels, and catchy formatting. Verified with 171/171 tests passing across 30 test files, TypeScript 0 errors, ESLint 0 warnings, and production build succeeded.
 - **2026-11-22 — Stage 2: Transaction Categorization Implementation:** Added transaction category support across schema, remote Supabase, RPCs, service layer, and UI. Created `categories` table with system seeds (8 Expense, 6 Income, 5 Transfer purposes), RLS policies, and added `category_id` to `transactions`. Updated atomic RPCs (`create_income_expense_transaction`, `update_income_expense_transaction`, `create_transfer`, `update_transfer`) to validate category ownership, kind compatibility, and active status. Updated views (`income_expense_transactions`, `transaction_feed`). Added `CategoryService`, `CategoryServiceProvider`, `CategoryCardSelector`, `CategoryBadge`, and `CategoryIcon`. Integrated category selector into unified `TransactionForm` and `TransferForm`, resetting category selection automatically when switching kinds, and integrated badges into transaction and transfer feed/detail pages. Verified with 159/159 tests passing, TypeScript 0 errors, ESLint 0 warnings, Prettier clean, remote Supabase migration pushed and linted with 0 errors, and production build succeeded.
 - **2026-11-22 — Stage 1: Privacy Mode (Hide Balance) Implementation:** Added a global balance privacy state (`BalancePrivacyProvider`, `useBalancePrivacy`) persisted in `localStorage` under `uangara:hide_balance`. Added interactive `BalancePrivacyToggle` with accessible eye/eye-slash icons on both the application header and the Accumulated Balance Hero Card. Integrated privacy masking (`Rp ••••••`) via `formatMoney(value, { hide: isHidden })` across `AccumulatedBalanceCard` (total saldo & MTD recap), `WalletCard`, `WalletCardSelector`, `FinancialRecapSection`, `TransactionListPage` (`displayAmount`), `WalletDetailPage`, `TransactionDetailPage`, and `TransferDetailPage`. Verified with comprehensive unit/integration test suite: 145/145 tests passed, TypeScript 0 errors, ESLint 0 warnings, Prettier clean, production build passed.

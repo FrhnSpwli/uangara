@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 import { getSupabaseClient } from '../../../lib/supabase/client'
 import type { Database } from '../../../types/database'
+import type { WalletType } from '../../wallets/types'
 import type { TransferDetail, TransferInput, TransferService } from '../types'
 import { SafeTransferError } from './transfer-errors'
 
@@ -67,20 +68,24 @@ function toTransferDetail(row: TransferRow): TransferDetail {
     description: row.description,
     destinationWalletArchivedAt: row.destination_wallet_archived_at,
     destinationWalletId: row.destination_wallet_id,
+    destinationWalletInstitution: row.destination_wallet_institution,
     destinationWalletName: row.destination_wallet_name,
+    destinationWalletType: row.destination_wallet_type as WalletType,
     feeAmount: row.fee_amount,
     id: row.transaction_id,
     notes: row.notes,
     occurredAt: row.occurred_at,
     sourceWalletArchivedAt: row.source_wallet_archived_at,
     sourceWalletId: row.source_wallet_id,
+    sourceWalletInstitution: row.source_wallet_institution,
     sourceWalletName: row.source_wallet_name,
+    sourceWalletType: row.source_wallet_type as WalletType,
     updatedAt: row.updated_at,
   }
 }
 
 const transferSelect =
-  'transaction_id,user_id,kind,wallet_id,wallet_name,wallet_archived_at,source_wallet_id,source_wallet_name,source_wallet_archived_at,destination_wallet_id,destination_wallet_name,destination_wallet_archived_at,category_id,category_name,category_icon,category_color,description,notes,amount,fee_amount,occurred_at,deleted_at,created_at,updated_at'
+  'transaction_id,user_id,kind,wallet_id,wallet_name,wallet_institution,wallet_type,wallet_archived_at,source_wallet_id,source_wallet_name,source_wallet_institution,source_wallet_type,source_wallet_archived_at,destination_wallet_id,destination_wallet_name,destination_wallet_institution,destination_wallet_type,destination_wallet_archived_at,category_id,category_name,category_icon,category_color,description,notes,amount,fee_amount,occurred_at,deleted_at,created_at,updated_at'
 
 export function createSupabaseTransferService(
   client: SupabaseClient<Database>,

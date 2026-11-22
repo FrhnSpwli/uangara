@@ -302,7 +302,13 @@ export function TransactionDetailPage() {
           {transaction.description}
         </h1>
         <div className="mt-5 flex flex-col gap-2 text-sm text-slate-300 sm:flex-row sm:justify-between">
-          <span>{transaction.walletName}</span>
+          <span>
+            {transaction.walletInstitution &&
+            transaction.walletInstitution.trim().toLowerCase() !==
+              transaction.walletName.trim().toLowerCase()
+              ? `${transaction.walletInstitution} (${transaction.walletName})`
+              : transaction.walletName}
+          </span>
           <span>
             {occurredAtFormatter.format(new Date(transaction.occurredAt))}
           </span>

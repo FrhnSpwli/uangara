@@ -6,6 +6,7 @@ import {
 } from '../../../test/transactions'
 import {
   calculateAccumulatedBalance,
+  calculateCategoryBreakdown,
   calculateRecap,
   formatDateToInput,
   getCustomRange,
@@ -115,5 +116,48 @@ describe('recap utilities', () => {
     expect(custom.endDate).toBe(
       new Date(2026, 10, 15, 23, 59, 59, 999).toISOString(),
     )
+  })
+
+  it('calculates category breakdown percentages and amounts', () => {
+    const transactions = [
+      createTransactionSummary({
+        amount: '60000',
+        categoryColor: '#f97316',
+        categoryIcon: 'utensils',
+        categoryId: 'c1',
+        categoryName: 'Makanan & Minuman',
+        id: '1',
+        kind: 'expense',
+      }),
+      createTransactionSummary({
+        amount: '40000',
+        categoryColor: '#0ea5e9',
+        categoryIcon: 'car',
+        categoryId: 'c2',
+        categoryName: 'Transportasi',
+        id: '2',
+        kind: 'expense',
+      }),
+      createTransferSummary({
+        amount: '200000',
+        feeAmount: '5000',
+        id: '3',
+      }),
+    ]
+
+    const expenseBreakdown = calculateCategoryBreakdown(transactions, 'expense')
+    expect(expenseBreakdown.totalAmount).toBe('105000')
+    expect(expenseBreakdown.totalCount).toBe(3)
+    expect(expenseBreakdown.items).toHaveLength(3)
+    expect(expenseBreakdown.items[0].name).toBe('Makanan & Minuman')
+    expect(expenseBreakdown.items[0].percentage).toBe(57.1)
+    expect(expenseBreakdown.items[1].name).toBe('Transportasi')
+    expect(expenseBreakdown.items[1].percentage).toBe(38)
+    expect(expenseBreakdown.items[2].name).toBe('Biaya Transfer')
+    expect(expenseBreakdown.items[2].amount).toBe('5000')
+
+    const incomeBreakdown = calculateCategoryBreakdown(transactions, 'income')
+    expect(incomeBreakdown.totalAmount).toBe('0')
+    expect(incomeBreakdown.items).toHaveLength(0)
   })
 })

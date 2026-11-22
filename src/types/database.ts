@@ -197,7 +197,9 @@ export interface Database {
           user_id: string
           wallet_archived_at: string | null
           wallet_id: string
+          wallet_institution: string | null
           wallet_name: string
+          wallet_type: string
         }
         Relationships: []
       }
@@ -213,20 +215,26 @@ export interface Database {
           description: string | null
           destination_wallet_archived_at: string | null
           destination_wallet_id: string | null
+          destination_wallet_institution: string | null
           destination_wallet_name: string | null
+          destination_wallet_type: string | null
           fee_amount: string
           kind: string
           notes: string | null
           occurred_at: string
           source_wallet_archived_at: string | null
           source_wallet_id: string | null
+          source_wallet_institution: string | null
           source_wallet_name: string | null
+          source_wallet_type: string | null
           transaction_id: string
           updated_at: string
           user_id: string
           wallet_archived_at: string | null
           wallet_id: string | null
+          wallet_institution: string | null
           wallet_name: string | null
+          wallet_type: string | null
         }
         Relationships: []
       }

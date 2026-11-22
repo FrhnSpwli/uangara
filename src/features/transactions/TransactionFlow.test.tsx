@@ -86,6 +86,36 @@ describe('income and expense transaction flow', () => {
     expect(transfer).toHaveTextContent(/fee/i)
   })
 
+  it('displays provider and account number on transaction cards in the feed', async () => {
+    const transactionService = createTransactionServiceStub()
+    const walletService = createWalletServiceStub()
+    transactionService.listTransactions.mockResolvedValue([
+      createTransactionSummary({
+        description: 'Secbowl',
+        walletInstitution: 'ShopeePay',
+        walletName: '081241252656',
+      }),
+      createTransferSummary({
+        description: 'Top Up',
+        destinationWalletInstitution: 'ShopeePay',
+        destinationWalletName: '081241252656',
+        sourceWalletInstitution: 'Bank Jago',
+        sourceWalletName: '109254920681',
+      }),
+    ])
+
+    renderAt('/app/transactions', transactionService, walletService)
+
+    expect(
+      await screen.findByText(/^ShopeePay \(081241252656\)/i),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        /^Bank Jago \(109254920681\) → ShopeePay \(081241252656\)/i,
+      ),
+    ).toBeInTheDocument()
+  })
+
   it('renders financial recap on the transactions page and does not show transfer money link', async () => {
     const transactionService = createTransactionServiceStub()
     const walletService = createWalletServiceStub()

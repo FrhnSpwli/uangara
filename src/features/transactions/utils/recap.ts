@@ -211,3 +211,147 @@ export function calculateRecap(
     transferCount,
   }
 }
+
+export interface CategoryBreakdownSummary {
+  amount: string
+  color: string
+  count: number
+  icon: string
+  id: string
+  name: string
+  percentage: number
+}
+
+export function calculateCategoryBreakdown(
+  transactions: readonly FinancialTransactionSummary[],
+  kind: 'expense' | 'income',
+): {
+  items: CategoryBreakdownSummary[]
+  totalAmount: string
+  totalCount: number
+} {
+  const groups = new Map<
+    string,
+    {
+      amount: bigint
+      color: string
+      count: number
+      icon: string
+      id: string
+      name: string
+    }
+  >()
+
+  let total = 0n
+  let totalCount = 0
+
+  for (const tx of transactions) {
+    if (tx.deletedAt) continue
+
+    if (kind === 'income' && tx.kind === 'income') {
+      try {
+        const amt = BigInt(tx.amount)
+        if (amt <= 0n) continue
+        total += amt
+        totalCount += 1
+
+        const id = tx.categoryId || 'uncategorized'
+        const existing = groups.get(id)
+        if (existing) {
+          existing.amount += amt
+          existing.count += 1
+        } else {
+          groups.set(id, {
+            amount: amt,
+            color: tx.categoryColor || '#10b981',
+            count: 1,
+            icon: tx.categoryIcon || 'wallet',
+            id,
+            name: tx.categoryName || 'Tanpa Kategori',
+          })
+        }
+      } catch {
+        // ignore
+      }
+    } else if (kind === 'expense') {
+      if (tx.kind === 'expense') {
+        try {
+          const amt = BigInt(tx.amount)
+          if (amt <= 0n) continue
+          total += amt
+          totalCount += 1
+
+          const id = tx.categoryId || 'uncategorized'
+          const existing = groups.get(id)
+          if (existing) {
+            existing.amount += amt
+            existing.count += 1
+          } else {
+            groups.set(id, {
+              amount: amt,
+              color: tx.categoryColor || '#f97316',
+              count: 1,
+              icon: tx.categoryIcon || 'wallet',
+              id,
+              name: tx.categoryName || 'Tanpa Kategori',
+            })
+          }
+        } catch {
+          // ignore
+        }
+      } else if (tx.kind === 'transfer') {
+        try {
+          const fee = BigInt(tx.feeAmount)
+          if (fee > 0n) {
+            total += fee
+            totalCount += 1
+            const id = 'transfer_fee'
+            const existing = groups.get(id)
+            if (existing) {
+              existing.amount += fee
+              existing.count += 1
+            } else {
+              groups.set(id, {
+                amount: fee,
+                color: '#dc2626',
+                count: 1,
+                icon: 'credit-card',
+                id,
+                name: 'Biaya Transfer',
+              })
+            }
+          }
+        } catch {
+          // ignore
+        }
+      }
+    }
+  }
+
+  const items: CategoryBreakdownSummary[] = Array.from(groups.values())
+    .map((g) => {
+      let pct = 0
+      if (total > 0n) {
+        pct = Number((g.amount * 1000n) / total) / 10
+      }
+      return {
+        amount: g.amount.toString(),
+        color: g.color,
+        count: g.count,
+        icon: g.icon,
+        id: g.id,
+        name: g.name,
+        percentage: pct,
+      }
+    })
+    .sort((a, b) => {
+      const diff = BigInt(b.amount) - BigInt(a.amount)
+      return diff > 0n ? 1 : diff < 0n ? -1 : 0
+    })
+
+  return {
+    items,
+    totalAmount: total.toString(),
+    totalCount,
+  }
+}

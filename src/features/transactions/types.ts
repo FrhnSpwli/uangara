@@ -21,7 +21,9 @@ export interface TransactionSummary {
   updatedAt: string
   walletArchivedAt: string | null
   walletId: string
+  walletInstitution?: string | null
   walletName: string
+  walletType?: WalletType | null
 }
 
 export interface TransferSummary {
@@ -35,7 +37,9 @@ export interface TransferSummary {
   description: string
   destinationWalletArchivedAt: string | null
   destinationWalletId: string
+  destinationWalletInstitution?: string | null
   destinationWalletName: string
+  destinationWalletType?: WalletType | null
   feeAmount: string
   id: string
   kind: 'transfer'
@@ -43,7 +47,9 @@ export interface TransferSummary {
   occurredAt: string
   sourceWalletArchivedAt: string | null
   sourceWalletId: string
+  sourceWalletInstitution?: string | null
   sourceWalletName: string
+  sourceWalletType?: WalletType | null
   updatedAt: string
   walletName: string
 }
