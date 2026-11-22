@@ -1,5 +1,8 @@
 import { AuthProvider } from '../features/auth/context/AuthProvider'
 import type { AuthService } from '../features/auth/services/auth-service'
+import { CategoryServiceProvider } from '../features/categories/context/CategoryServiceProvider'
+import { createSupabaseCategoryService } from '../features/categories/services/category-service'
+import type { CategoryService } from '../features/categories/types'
 import { BalancePrivacyProvider } from '../features/preferences/context/BalancePrivacyProvider'
 import { TransactionServiceProvider } from '../features/transactions/context/TransactionServiceProvider'
 import type { TransactionService } from '../features/transactions/types'
@@ -11,6 +14,7 @@ import { AppRouter } from './router/AppRouter'
 
 interface AppProps {
   authService: AuthService
+  categoryService?: CategoryService
   transactionService: TransactionService
   transferService: TransferService
   walletService: WalletService
@@ -18,6 +22,7 @@ interface AppProps {
 
 export function App({
   authService,
+  categoryService = createSupabaseCategoryService(),
   transactionService,
   transferService,
   walletService,
@@ -27,9 +32,11 @@ export function App({
       <WalletServiceProvider service={walletService}>
         <TransactionServiceProvider service={transactionService}>
           <TransferServiceProvider service={transferService}>
-            <BalancePrivacyProvider>
-              <AppRouter />
-            </BalancePrivacyProvider>
+            <CategoryServiceProvider service={categoryService}>
+              <BalancePrivacyProvider>
+                <AppRouter />
+              </BalancePrivacyProvider>
+            </CategoryServiceProvider>
           </TransferServiceProvider>
         </TransactionServiceProvider>
       </WalletServiceProvider>

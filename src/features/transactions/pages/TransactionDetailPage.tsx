@@ -2,6 +2,7 @@ import { type FormEvent, useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 
 import { formatMoney } from '../../../utils/money'
+import { CategoryBadge } from '../../categories/components/CategoryBadge'
 import { useBalancePrivacy } from '../../preferences/context/useBalancePrivacy'
 import { useWalletService } from '../../wallets/context/useWalletService'
 import { TransactionForm } from '../components/TransactionForm'
@@ -27,6 +28,7 @@ function valuesFromTransaction(
 ): TransactionFormValues {
   return {
     amount: transaction.amount,
+    categoryId: transaction.categoryId ?? null,
     description: transaction.description,
     kind: transaction.kind,
     notes: transaction.notes ?? '',
@@ -249,6 +251,13 @@ export function TransactionDetailPage() {
           <p className="text-sm font-semibold text-teal-300 capitalize">
             {transaction.kind}
           </p>
+          {transaction.categoryName ? (
+            <CategoryBadge
+              color={transaction.categoryColor}
+              icon={transaction.categoryIcon}
+              name={transaction.categoryName}
+            />
+          ) : null}
           {deleted ? (
             <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs font-semibold">
               Deleted

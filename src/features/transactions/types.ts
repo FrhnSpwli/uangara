@@ -7,6 +7,10 @@ export type TransactionListMode = 'active' | 'deleted'
 
 export interface TransactionSummary {
   amount: string
+  categoryColor?: string | null
+  categoryIcon?: string | null
+  categoryId?: string | null
+  categoryName?: string | null
   createdAt: string
   deletedAt: string | null
   description: string
@@ -22,6 +26,10 @@ export interface TransactionSummary {
 
 export interface TransferSummary {
   amount: string
+  categoryColor?: string | null
+  categoryIcon?: string | null
+  categoryId?: string | null
+  categoryName?: string | null
   createdAt: string
   deletedAt: string | null
   description: string
@@ -46,6 +54,7 @@ export type TransactionDetail = TransactionSummary
 
 export interface IncomeExpenseTransactionInput {
   amount: number
+  categoryId?: string | null
   description: string
   kind: TransactionKind
   notes: string | null

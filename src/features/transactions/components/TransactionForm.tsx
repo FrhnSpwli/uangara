@@ -1,5 +1,8 @@
-import type { FormEvent } from 'react'
+import { useContext, useEffect, useState, type FormEvent } from 'react'
 
+import { CategoryCardSelector } from '../../categories/components/CategoryCardSelector'
+import { CategoryServiceContext } from '../../categories/context/category-service-context'
+import type { Category, CategoryType } from '../../categories/types'
 import { WalletCardSelector } from '../../wallets/components/WalletCardSelector'
 import type { TransactionWalletOption } from '../types'
 import type {
@@ -9,6 +12,7 @@ import type {
 
 interface TransactionFormProps {
   allowTransfer?: boolean
+  categories?: Category[]
   errors: TransactionFormErrors
   kindChanged?: boolean
   onChange: (values: TransactionFormValues) => void
@@ -97,6 +101,7 @@ const transactionTypeCards = [
 
 export function TransactionForm({
   allowTransfer = true,
+  categories: categoriesProp,
   errors,
   kindChanged = false,
   onChange,
@@ -106,6 +111,31 @@ export function TransactionForm({
   values,
   wallets,
 }: TransactionFormProps) {
+  const categoryService = useContext(CategoryServiceContext)
+  const [loadedCategories, setLoadedCategories] = useState<Category[]>([])
+
+  useEffect(() => {
+    let active = true
+    if (categoriesProp && categoriesProp.length > 0) {
+      return
+    }
+    if (categoryService) {
+      void categoryService
+        .listCategories()
+        .then((cats) => {
+          if (active) {
+            setLoadedCategories(cats)
+          }
+        })
+        .catch(() => {})
+    }
+    return () => {
+      active = false
+    }
+  }, [categoryService, categoriesProp])
+
+  const categories = categoriesProp ?? loadedCategories
+
   function update<Key extends keyof TransactionFormValues>(
     key: Key,
     value: TransactionFormValues[Key],
@@ -114,7 +144,11 @@ export function TransactionForm({
   }
 
   function handleKindChange(nextKind: string) {
-    const updated: TransactionFormValues = { ...values, kind: nextKind }
+    const updated: TransactionFormValues = {
+      ...values,
+      categoryId: null,
+      kind: nextKind,
+    }
     if (nextKind === 'transfer') {
       if (!updated.sourceWalletId && updated.walletId) {
         updated.sourceWalletId = updated.walletId
@@ -234,6 +268,17 @@ export function TransactionForm({
           </p>
         ) : null}
       </div>
+
+      {/* Category Card Selector */}
+      {categories.length > 0 ? (
+        <CategoryCardSelector
+          categories={categories}
+          disabled={pending}
+          onChange={(catId) => update('categoryId', catId)}
+          type={values.kind as CategoryType}
+          value={values.categoryId ?? null}
+        />
+      ) : null}
 
       {/* Wallet Card Selector */}
       {isTransfer ? (

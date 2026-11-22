@@ -2,6 +2,7 @@ import { type FormEvent, useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 
 import { formatMoney } from '../../../utils/money'
+import { CategoryBadge } from '../../categories/components/CategoryBadge'
 import { useBalancePrivacy } from '../../preferences/context/useBalancePrivacy'
 import { toLocalDateTimeValue } from '../../transactions/utils/validation'
 import { useWalletService } from '../../wallets/context/useWalletService'
@@ -20,6 +21,7 @@ type PendingAction = 'delete' | 'restore' | 'update' | null
 function valuesFromTransfer(transfer: TransferDetail): TransferFormValues {
   return {
     amount: transfer.amount,
+    categoryId: transfer.categoryId ?? null,
     description: transfer.description,
     destinationWalletId: transfer.destinationWalletId,
     fee: transfer.feeAmount,
@@ -200,9 +202,18 @@ export function TransferDetailPage() {
       <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-brand-700 text-sm font-semibold uppercase">
-              Wallet transfer
-            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-brand-700 text-sm font-semibold uppercase">
+                Wallet transfer
+              </p>
+              {transfer.categoryName ? (
+                <CategoryBadge
+                  color={transfer.categoryColor}
+                  icon={transfer.categoryIcon}
+                  name={transfer.categoryName}
+                />
+              ) : null}
+            </div>
             <h1 className="mt-2 text-3xl font-bold text-slate-950">
               {transfer.description}
             </h1>

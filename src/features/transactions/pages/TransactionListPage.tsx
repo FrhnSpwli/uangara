@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 
-import { useBalancePrivacy } from '../../preferences/context/useBalancePrivacy'
 import { formatMoney } from '../../../utils/money'
+import { CategoryBadge } from '../../categories/components/CategoryBadge'
+import { useBalancePrivacy } from '../../preferences/context/useBalancePrivacy'
 import { FinancialRecapSection } from '../components/FinancialRecapSection'
 import { useTransactionService } from '../context/useTransactionService'
 import { getTransactionErrorMessage } from '../services/transaction-errors'
@@ -181,6 +182,13 @@ export function TransactionListPage() {
                     <h2 className="font-semibold text-slate-950">
                       {transaction.description}
                     </h2>
+                    {transaction.categoryName ? (
+                      <CategoryBadge
+                        color={transaction.categoryColor}
+                        icon={transaction.categoryIcon}
+                        name={transaction.categoryName}
+                      />
+                    ) : null}
                     {transaction.deletedAt ? (
                       <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
                         Deleted

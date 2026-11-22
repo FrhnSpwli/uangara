@@ -2,6 +2,7 @@ import type { WalletType } from '../wallets/types'
 
 export interface TransferInput {
   amount: number
+  categoryId?: string | null
   description: string
   destinationWalletId: string
   fee: number
@@ -12,6 +13,10 @@ export interface TransferInput {
 
 export interface TransferDetail {
   amount: string
+  categoryColor?: string | null
+  categoryIcon?: string | null
+  categoryId?: string | null
+  categoryName?: string | null
   createdAt: string
   deletedAt: string | null
   description: string

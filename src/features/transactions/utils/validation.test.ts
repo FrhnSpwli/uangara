@@ -21,6 +21,7 @@ describe('transaction form validation', () => {
     expect(validateTransactionForm(values(), now)).toEqual({
       input: {
         amount: 35000,
+        categoryId: null,
         description: 'Lunch',
         kind: 'expense',
         notes: null,
@@ -97,6 +98,7 @@ describe('transaction form validation', () => {
     expect(validateTransactionForm(transferValues, now)).toEqual({
       input: {
         amount: 50000,
+        categoryId: null,
         description: 'Transfer to savings',
         destinationWalletId: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
         fee: 2500,

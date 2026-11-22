@@ -1,5 +1,8 @@
-import type { FormEvent } from 'react'
+import { useContext, useEffect, useState, type FormEvent } from 'react'
 
+import { CategoryCardSelector } from '../../categories/components/CategoryCardSelector'
+import { CategoryServiceContext } from '../../categories/context/category-service-context'
+import type { Category } from '../../categories/types'
 import { WalletCardSelector } from '../../wallets/components/WalletCardSelector'
 import type { TransferWalletOption } from '../types'
 import type {
@@ -8,6 +11,7 @@ import type {
 } from '../utils/validation'
 
 interface TransferFormProps {
+  categories?: Category[]
   errors: TransferFormErrors
   onChange: (values: TransferFormValues) => void
   onSubmit: (event: FormEvent<HTMLFormElement>) => void
@@ -18,6 +22,7 @@ interface TransferFormProps {
 }
 
 export function TransferForm({
+  categories: categoriesProp,
   errors,
   onChange,
   onSubmit,
@@ -26,6 +31,27 @@ export function TransferForm({
   values,
   wallets,
 }: TransferFormProps) {
+  const categoryService = useContext(CategoryServiceContext)
+  const [loadedCategories, setLoadedCategories] = useState<Category[]>([])
+
+  useEffect(() => {
+    let active = true
+    if (categoriesProp && categoriesProp.length > 0) return
+    if (categoryService) {
+      void categoryService
+        .listCategories('transfer')
+        .then((cats) => {
+          if (active) setLoadedCategories(cats)
+        })
+        .catch(() => {})
+    }
+    return () => {
+      active = false
+    }
+  }, [categoryService, categoriesProp])
+
+  const categories = categoriesProp ?? loadedCategories
+
   function update<Key extends keyof TransferFormValues>(
     key: Key,
     value: TransferFormValues[Key],
@@ -35,6 +61,15 @@ export function TransferForm({
 
   return (
     <form className="space-y-6" noValidate onSubmit={onSubmit}>
+      {categories.length > 0 ? (
+        <CategoryCardSelector
+          categories={categories}
+          disabled={pending}
+          onChange={(catId) => update('categoryId', catId)}
+          type="transfer"
+          value={values.categoryId ?? null}
+        />
+      ) : null}
       <WalletCardSelector
         disabled={pending}
         disabledWalletIds={

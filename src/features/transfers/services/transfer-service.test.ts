@@ -32,6 +32,7 @@ describe('transfer service boundary', () => {
 
     expect(rpc).toHaveBeenCalledWith('create_transfer', {
       p_amount: 500000,
+      p_category_id: null,
       p_description: 'Mandiri to GoPay',
       p_destination_wallet_id: input.destinationWalletId,
       p_fee: 1000,
@@ -106,6 +107,7 @@ describe('transfer service boundary', () => {
 
     expect(rpc).toHaveBeenNthCalledWith(1, 'update_transfer', {
       p_amount: 500000,
+      p_category_id: null,
       p_description: input.description,
       p_destination_wallet_id: input.destinationWalletId,
       p_fee: 1000,
