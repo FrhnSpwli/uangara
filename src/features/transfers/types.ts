@@ -1,3 +1,5 @@
+import type { WalletType } from '../wallets/types'
+
 export interface TransferInput {
   amount: number
   description: string
@@ -28,8 +30,11 @@ export interface TransferDetail {
 
 export interface TransferWalletOption {
   archivedAt: string | null
+  balance?: string
   id: string
+  institution?: string | null
   name: string
+  type?: WalletType
 }
 
 export interface TransferService {

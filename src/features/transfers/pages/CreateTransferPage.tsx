@@ -54,8 +54,11 @@ export function CreateTransferPage() {
           setWallets(
             result.map((wallet) => ({
               archivedAt: wallet.archivedAt,
+              balance: wallet.balance,
               id: wallet.id,
+              institution: wallet.institution,
               name: wallet.name,
+              type: wallet.type,
             })),
           )
         }

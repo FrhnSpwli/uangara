@@ -27,6 +27,7 @@ describe('transaction form validation', () => {
         occurredAt: '2026-09-02T10:00:00.000Z',
         walletId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
       },
+      kind: 'expense',
       valid: true,
     })
   })
@@ -59,13 +60,71 @@ describe('transaction form validation', () => {
       ),
     ).toMatchObject({
       input: { description: 'Salary', kind: 'income', notes: 'Net' },
+      kind: 'income',
       valid: true,
     })
 
     expect(
-      validateTransactionForm(values({ kind: 'transfer' }), now),
+      validateTransactionForm(values({ kind: 'other' }), now),
+    ).toMatchObject({
+      errors: { kind: 'Choose income, expense, or transfer.' },
+      valid: false,
+    })
+
+    expect(
+      validateTransactionForm(values({ kind: 'transfer' }), now, {
+        allowTransfer: false,
+      }),
     ).toMatchObject({
       errors: { kind: 'Choose income or expense.' },
+      valid: false,
+    })
+  })
+
+  it('validates transfer form when kind is transfer', () => {
+    const transferValues = {
+      amount: '50000',
+      description: 'Transfer to savings',
+      destinationWalletId: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+      fee: '2500',
+      kind: 'transfer',
+      notes: 'Monthly saving',
+      occurredAt: '2026-09-02T10:00:00.000Z',
+      sourceWalletId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+      walletId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+    }
+
+    expect(validateTransactionForm(transferValues, now)).toEqual({
+      input: {
+        amount: 50000,
+        description: 'Transfer to savings',
+        destinationWalletId: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+        fee: 2500,
+        notes: 'Monthly saving',
+        occurredAt: '2026-09-02T10:00:00.000Z',
+        sourceWalletId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+      },
+      kind: 'transfer',
+      valid: true,
+    })
+  })
+
+  it('rejects transfer when source and destination are the same', () => {
+    const transferValues = {
+      amount: '50000',
+      description: 'Self transfer',
+      destinationWalletId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+      kind: 'transfer',
+      notes: '',
+      occurredAt: '2026-09-02T10:00:00.000Z',
+      sourceWalletId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+      walletId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+    }
+
+    expect(validateTransactionForm(transferValues, now)).toMatchObject({
+      errors: {
+        destinationWalletId: 'Source and destination must be different.',
+      },
       valid: false,
     })
   })

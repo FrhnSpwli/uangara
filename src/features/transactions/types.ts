@@ -1,3 +1,5 @@
+import type { WalletType } from '../wallets/types'
+
 export const transactionKinds = ['income', 'expense'] as const
 
 export type TransactionKind = (typeof transactionKinds)[number]
@@ -53,8 +55,11 @@ export interface IncomeExpenseTransactionInput {
 
 export interface TransactionWalletOption {
   archivedAt: string | null
+  balance?: string
   id: string
+  institution?: string | null
   name: string
+  type?: WalletType
 }
 
 export interface TransactionService {

@@ -14,7 +14,10 @@ import {
   createWalletServiceStub,
   createWalletSummary,
 } from '../../test/wallets'
+import { createTransferServiceStub } from '../../test/transfers'
 import { AuthProvider } from '../auth/context/AuthProvider'
+import { TransferServiceProvider } from '../transfers/context/TransferServiceProvider'
+import type { TransferService } from '../transfers/types'
 import { WalletServiceProvider } from '../wallets/context/WalletServiceProvider'
 import type { WalletService } from '../wallets/types'
 import { TransactionServiceProvider } from './context/TransactionServiceProvider'
@@ -25,6 +28,7 @@ function renderAt(
   path: string,
   transactionService: TransactionService,
   walletService: WalletService,
+  transferService: TransferService = createTransferServiceStub(),
 ) {
   const { service: authService } = createAuthServiceStub(createTestSession())
 
@@ -32,9 +36,11 @@ function renderAt(
     <AuthProvider service={authService}>
       <WalletServiceProvider service={walletService}>
         <TransactionServiceProvider service={transactionService}>
-          <MemoryRouter initialEntries={[path]}>
-            <AppRoutes />
-          </MemoryRouter>
+          <TransferServiceProvider service={transferService}>
+            <MemoryRouter initialEntries={[path]}>
+              <AppRoutes />
+            </MemoryRouter>
+          </TransferServiceProvider>
         </TransactionServiceProvider>
       </WalletServiceProvider>
     </AuthProvider>,
@@ -78,6 +84,20 @@ describe('income and expense transaction flow', () => {
       '/app/transfers/dddddddd-dddd-dddd-dddd-dddddddddddd',
     )
     expect(transfer).toHaveTextContent(/fee/i)
+  })
+
+  it('renders financial recap on the transactions page and does not show transfer money link', async () => {
+    const transactionService = createTransactionServiceStub()
+    const walletService = createWalletServiceStub()
+
+    renderAt('/app/transactions', transactionService, walletService)
+
+    expect(await screen.findByText('Hari Ini')).toBeInTheDocument()
+    expect(screen.getByText('Minggu Ini')).toBeInTheDocument()
+    expect(screen.getByText('Bulan Ini')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: 'Transfer money' }),
+    ).not.toBeInTheDocument()
   })
 
   it('shows loading and empty states for recent transactions', async () => {
@@ -200,6 +220,94 @@ describe('income and expense transaction flow', () => {
       expect(transactionService.createTransaction).not.toHaveBeenCalled()
     },
   )
+
+  it('creates a transfer when selecting transfer type in transaction form', async () => {
+    const transactionService = createTransactionServiceStub()
+    const transferService = createTransferServiceStub()
+    const walletService = createWalletServiceStub()
+    walletService.listWallets.mockResolvedValue([
+      createWalletSummary({
+        id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+        name: 'Mandiri',
+      }),
+      createWalletSummary({
+        id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+        name: 'GoPay',
+        type: 'e_wallet',
+      }),
+    ])
+
+    renderAt(
+      '/app/transactions/new',
+      transactionService,
+      walletService,
+      transferService,
+    )
+
+    fireEvent.change(await screen.findByLabelText('Transaction type'), {
+      target: { value: 'transfer' },
+    })
+    fireEvent.change(await screen.findByLabelText('Source wallet'), {
+      target: { value: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' },
+    })
+    fireEvent.change(screen.getByLabelText('Destination wallet'), {
+      target: { value: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb' },
+    })
+    fireEvent.change(screen.getByLabelText('Transfer amount'), {
+      target: { value: '75000' },
+    })
+    fireEvent.change(screen.getByLabelText('Description'), {
+      target: { value: 'Top up GoPay from form' },
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Create transfer' }))
+
+    await waitFor(() => {
+      expect(transferService.createTransfer).toHaveBeenCalledWith(
+        expect.objectContaining({
+          amount: 75000,
+          description: 'Top up GoPay from form',
+          destinationWalletId: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+          fee: 0,
+          sourceWalletId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+        }),
+        expect.any(String),
+      )
+    })
+  })
+
+  it('disables the selected source wallet in destination selector', async () => {
+    const transactionService = createTransactionServiceStub()
+    const walletService = createWalletServiceStub()
+    walletService.listWallets.mockResolvedValue([
+      createWalletSummary({
+        id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+        name: 'Mandiri',
+      }),
+      createWalletSummary({
+        id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+        name: 'GoPay',
+        type: 'e_wallet',
+      }),
+    ])
+
+    renderAt('/app/transactions/new', transactionService, walletService)
+
+    fireEvent.change(await screen.findByLabelText('Transaction type'), {
+      target: { value: 'transfer' },
+    })
+
+    fireEvent.change(await screen.findByLabelText('Source wallet'), {
+      target: { value: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' },
+    })
+
+    // Destination selector should have Mandiri disabled because Mandiri is source
+    const destSelector = screen.getByLabelText('Destination wallet')
+    const mandiriOption = destSelector.querySelector(
+      'option[value="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"]',
+    )
+    expect(mandiriOption).toBeDisabled()
+  })
 
   it('accepts an expense larger than the displayed wallet balance', async () => {
     const transactionService = createTransactionServiceStub()
