@@ -37,6 +37,9 @@ export function TransferForm({
     <form className="space-y-6" noValidate onSubmit={onSubmit}>
       <WalletCardSelector
         disabled={pending}
+        disabledWalletIds={
+          values.destinationWalletId ? [values.destinationWalletId] : []
+        }
         error={errors.sourceWalletId}
         id="transfer-source"
         label="Source wallet"
@@ -48,6 +51,7 @@ export function TransferForm({
 
       <WalletCardSelector
         disabled={pending}
+        disabledWalletIds={values.sourceWalletId ? [values.sourceWalletId] : []}
         error={errors.destinationWalletId}
         id="transfer-destination"
         label="Destination wallet"

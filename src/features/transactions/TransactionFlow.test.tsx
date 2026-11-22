@@ -14,9 +14,7 @@ import {
   createWalletServiceStub,
   createWalletSummary,
 } from '../../test/wallets'
-import {
-  createTransferServiceStub,
-} from '../../test/transfers'
+import { createTransferServiceStub } from '../../test/transfers'
 import { AuthProvider } from '../auth/context/AuthProvider'
 import { TransferServiceProvider } from '../transfers/context/TransferServiceProvider'
 import type { TransferService } from '../transfers/types'
@@ -86,6 +84,20 @@ describe('income and expense transaction flow', () => {
       '/app/transfers/dddddddd-dddd-dddd-dddd-dddddddddddd',
     )
     expect(transfer).toHaveTextContent(/fee/i)
+  })
+
+  it('renders financial recap on the transactions page and does not show transfer money link', async () => {
+    const transactionService = createTransactionServiceStub()
+    const walletService = createWalletServiceStub()
+
+    renderAt('/app/transactions', transactionService, walletService)
+
+    expect(await screen.findByText('Hari Ini')).toBeInTheDocument()
+    expect(screen.getByText('Minggu Ini')).toBeInTheDocument()
+    expect(screen.getByText('Bulan Ini')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: 'Transfer money' }),
+    ).not.toBeInTheDocument()
   })
 
   it('shows loading and empty states for recent transactions', async () => {
@@ -262,6 +274,39 @@ describe('income and expense transaction flow', () => {
         expect.any(String),
       )
     })
+  })
+
+  it('disables the selected source wallet in destination selector', async () => {
+    const transactionService = createTransactionServiceStub()
+    const walletService = createWalletServiceStub()
+    walletService.listWallets.mockResolvedValue([
+      createWalletSummary({
+        id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+        name: 'Mandiri',
+      }),
+      createWalletSummary({
+        id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+        name: 'GoPay',
+        type: 'e_wallet',
+      }),
+    ])
+
+    renderAt('/app/transactions/new', transactionService, walletService)
+
+    fireEvent.change(await screen.findByLabelText('Transaction type'), {
+      target: { value: 'transfer' },
+    })
+
+    fireEvent.change(await screen.findByLabelText('Source wallet'), {
+      target: { value: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' },
+    })
+
+    // Destination selector should have Mandiri disabled because Mandiri is source
+    const destSelector = screen.getByLabelText('Destination wallet')
+    const mandiriOption = destSelector.querySelector(
+      'option[value="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"]',
+    )
+    expect(mandiriOption).toBeDisabled()
   })
 
   it('accepts an expense larger than the displayed wallet balance', async () => {

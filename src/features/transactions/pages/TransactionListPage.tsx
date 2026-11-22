@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 
 import { formatMoney } from '../../../utils/money'
+import { FinancialRecapSection } from '../components/FinancialRecapSection'
 import { useTransactionService } from '../context/useTransactionService'
 import { getTransactionErrorMessage } from '../services/transaction-errors'
 import type { FinancialTransactionSummary, TransactionListMode } from '../types'
@@ -89,18 +90,15 @@ export function TransactionListPage() {
           </p>
         </div>
         <Link
-          className="bg-brand-700 hover:bg-brand-800 inline-flex min-h-11 items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-white"
+          className="bg-brand-700 hover:bg-brand-800 inline-flex min-h-11 items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm shrink-0"
           to="/app/transactions/new"
         >
           Add transaction
         </Link>
-        <Link
-          className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100"
-          to="/app/transfers/new"
-        >
-          Transfer money
-        </Link>
       </div>
+
+      {/* Financial Recap Section */}
+      <FinancialRecapSection />
 
       <div
         aria-label="Transaction status"

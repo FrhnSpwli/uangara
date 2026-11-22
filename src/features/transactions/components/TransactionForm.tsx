@@ -119,6 +119,13 @@ export function TransactionForm({
       if (!updated.sourceWalletId && updated.walletId) {
         updated.sourceWalletId = updated.walletId
       }
+      if (
+        updated.destinationWalletId &&
+        updated.destinationWalletId ===
+          (updated.sourceWalletId || updated.walletId)
+      ) {
+        updated.destinationWalletId = ''
+      }
     } else {
       if (!updated.walletId && updated.sourceWalletId) {
         updated.walletId = updated.sourceWalletId
@@ -233,6 +240,9 @@ export function TransactionForm({
         <div className="space-y-4">
           <WalletCardSelector
             disabled={pending}
+            disabledWalletIds={
+              values.destinationWalletId ? [values.destinationWalletId] : []
+            }
             error={errors.sourceWalletId}
             id="transfer-source"
             label="Source wallet"
@@ -250,6 +260,11 @@ export function TransactionForm({
 
           <WalletCardSelector
             disabled={pending}
+            disabledWalletIds={
+              values.sourceWalletId || values.walletId
+                ? [values.sourceWalletId || values.walletId]
+                : []
+            }
             error={errors.destinationWalletId}
             id="transfer-destination"
             label="Destination wallet"

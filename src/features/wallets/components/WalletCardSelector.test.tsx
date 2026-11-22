@@ -163,4 +163,33 @@ describe('WalletCardSelector', () => {
 
     expect(screen.getByText('Choose an active wallet.')).toBeInTheDocument()
   })
+
+  it('disables wallets that are specified in disabledWalletIds and prevents selecting them', () => {
+    const handleChange = vi.fn()
+    render(
+      <WalletCardSelector
+        disabledWalletIds={['wallet-2']}
+        id="test-wallet"
+        label="Select wallet"
+        onChange={handleChange}
+        value="wallet-1"
+        wallets={mockWallets.slice(0, 3)}
+      />,
+    )
+
+    const disabledCard = screen.getByRole('radio', { name: /Bank Mandiri/i })
+    expect(disabledCard).toBeDisabled()
+    expect(disabledCard).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.getByText('Dipilih')).toBeInTheDocument()
+
+    // Clicking disabled card should not fire onChange
+    fireEvent.click(disabledCard)
+    expect(handleChange).not.toHaveBeenCalled()
+
+    // Non-disabled card works normally
+    const normalCard = screen.getByRole('radio', { name: /GoPay/i })
+    expect(normalCard).not.toBeDisabled()
+    fireEvent.click(normalCard)
+    expect(handleChange).toHaveBeenCalledWith('wallet-3')
+  })
 })

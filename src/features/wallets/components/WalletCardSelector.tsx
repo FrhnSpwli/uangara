@@ -16,6 +16,7 @@ export interface WalletCardSelectorOption {
 
 interface WalletCardSelectorProps {
   disabled?: boolean
+  disabledWalletIds?: readonly string[]
   error?: string
   id?: string
   label: string
@@ -28,6 +29,7 @@ interface WalletCardSelectorProps {
 
 export function WalletCardSelector({
   disabled = false,
+  disabledWalletIds = [],
   error,
   id: providedId,
   label,
@@ -100,12 +102,16 @@ export function WalletCardSelector({
         value={value}
       >
         <option value="">{placeholder}</option>
-        {wallets.map((w) => (
-          <option key={w.id} value={w.id}>
-            {w.name}
-            {w.archivedAt ? ' (archived)' : ''}
-          </option>
-        ))}
+        {wallets.map((w) => {
+          const isOptionDisabled = disabledWalletIds.includes(w.id)
+          return (
+            <option disabled={isOptionDisabled} key={w.id} value={w.id}>
+              {w.name}
+              {w.archivedAt ? ' (archived)' : ''}
+              {isOptionDisabled ? ' (tidak dapat dipilih)' : ''}
+            </option>
+          )
+        })}
       </select>
 
       {/* Search filter when expanded and more than 6 wallets */}
@@ -129,20 +135,29 @@ export function WalletCardSelector({
       ) : (
         <div className="mt-2.5 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           {visibleWallets.map((wallet) => {
+            const isCardDisabled =
+              disabled || disabledWalletIds.includes(wallet.id)
             const isSelected = wallet.id === value
             const walletType = wallet.type ?? 'other'
 
             return (
               <button
                 aria-checked={isSelected}
+                aria-disabled={isCardDisabled}
                 className={`relative flex items-center gap-3 rounded-2xl border p-3 text-left transition-all ${
-                  isSelected
-                    ? 'border-brand-700 bg-brand-50/70 shadow-sm ring-2 ring-brand-700/20'
-                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
-                } ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
-                disabled={disabled}
+                  isCardDisabled
+                    ? 'border-slate-200 bg-slate-100/70 opacity-40 cursor-not-allowed'
+                    : isSelected
+                      ? 'border-brand-700 bg-brand-50/70 shadow-sm ring-2 ring-brand-700/20 cursor-pointer'
+                      : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50 cursor-pointer'
+                }`}
+                disabled={isCardDisabled}
                 key={wallet.id}
-                onClick={() => onChange(wallet.id)}
+                onClick={() => {
+                  if (!isCardDisabled) {
+                    onChange(wallet.id)
+                  }
+                }}
                 role="radio"
                 type="button"
               >
@@ -175,7 +190,11 @@ export function WalletCardSelector({
                   ) : null}
                 </div>
 
-                {isSelected ? (
+                {isCardDisabled ? (
+                  <span className="shrink-0 rounded-md bg-slate-200 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">
+                    Dipilih
+                  </span>
+                ) : isSelected ? (
                   <span
                     aria-hidden="true"
                     className="flex size-4 shrink-0 items-center justify-center rounded-full bg-brand-700 text-[10px] text-white"
