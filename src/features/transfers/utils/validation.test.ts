@@ -19,6 +19,7 @@ describe('transfer validation', () => {
     ).toEqual({
       input: {
         amount: 500000,
+        categoryId: null,
         description: 'Mandiri to GoPay',
         destinationWalletId: validValues.destinationWalletId,
         fee: 1000,

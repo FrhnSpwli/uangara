@@ -24,6 +24,7 @@ interface SubmissionAttempt {
 function initialValues(kind = 'expense'): TransactionFormValues {
   return {
     amount: '',
+    categoryId: null,
     description: '',
     destinationWalletId: '',
     fee: '0',

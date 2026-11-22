@@ -9,6 +9,45 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      categories: {
+        Row: {
+          archived_at: string | null
+          color: string
+          created_at: string
+          icon: string
+          id: string
+          is_system: boolean
+          name: string
+          type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          archived_at?: string | null
+          color?: string
+          created_at?: string
+          icon?: string
+          id?: string
+          is_system?: boolean
+          name: string
+          type: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          archived_at?: string | null
+          color?: string
+          created_at?: string
+          icon?: string
+          id?: string
+          is_system?: boolean
+          name?: string
+          type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -32,6 +71,7 @@ export interface Database {
       }
       transactions: {
         Row: {
+          category_id: string | null
           created_at: string
           deleted_at: string | null
           description: string | null
@@ -44,6 +84,7 @@ export interface Database {
           user_id: string
         }
         Insert: {
+          category_id?: string | null
           created_at?: string
           deleted_at?: string | null
           description?: string | null
@@ -56,6 +97,7 @@ export interface Database {
           user_id: string
         }
         Update: {
+          category_id?: string | null
           created_at?: string
           deleted_at?: string | null
           description?: string | null
@@ -140,6 +182,10 @@ export interface Database {
       income_expense_transactions: {
         Row: {
           amount: string
+          category_color: string | null
+          category_icon: string | null
+          category_id: string | null
+          category_name: string | null
           created_at: string
           deleted_at: string | null
           description: string | null
@@ -158,6 +204,10 @@ export interface Database {
       transaction_feed: {
         Row: {
           amount: string
+          category_color: string | null
+          category_icon: string | null
+          category_id: string | null
+          category_name: string | null
           created_at: string
           deleted_at: string | null
           description: string | null
@@ -214,6 +264,7 @@ export interface Database {
       create_income_expense_transaction: {
         Args: {
           p_amount: number
+          p_category_id?: string | null
           p_description: string
           p_kind: string
           p_notes?: string | null
@@ -225,6 +276,7 @@ export interface Database {
       create_transfer: {
         Args: {
           p_amount: number
+          p_category_id?: string | null
           p_description: string
           p_destination_wallet_id: string
           p_fee: number
@@ -267,6 +319,7 @@ export interface Database {
       update_income_expense_transaction: {
         Args: {
           p_amount: number
+          p_category_id?: string | null
           p_description: string
           p_kind: string
           p_notes?: string | null
@@ -279,6 +332,7 @@ export interface Database {
       update_transfer: {
         Args: {
           p_amount: number
+          p_category_id?: string | null
           p_description: string
           p_destination_wallet_id: string
           p_fee: number

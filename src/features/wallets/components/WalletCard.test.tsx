@@ -1,11 +1,15 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createWalletSummary } from '../../../test/wallets'
+import { BalancePrivacyProvider } from '../../preferences/context/BalancePrivacyProvider'
 import { WalletCard } from './WalletCard'
 
 describe('WalletCard', () => {
+  beforeEach(() => {
+    window.localStorage.clear()
+  })
   it('renders a bank wallet card with bank logo, account number, and balance', () => {
     const wallet = createWalletSummary({
       balance: '15000000',
@@ -84,5 +88,56 @@ describe('WalletCard', () => {
     )
 
     expect(screen.getByText('Archived')).toBeInTheDocument()
+  })
+
+  it('masks balance when privacy mode is enabled', () => {
+    localStorage.setItem('uangara:hide_balance', 'true')
+    const wallet = createWalletSummary({
+      balance: '15000000',
+      institution: 'BCA',
+      name: '1234567890',
+      type: 'bank',
+    })
+
+    render(
+      <MemoryRouter>
+        <BalancePrivacyProvider>
+          <WalletCard wallet={wallet} />
+        </BalancePrivacyProvider>
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText('Rp ••••••')).toBeInTheDocument()
+    expect(screen.queryByText(/15\.000\.000/)).not.toBeInTheDocument()
+  })
+
+  it('copies account number and provider to clipboard on copy click', () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.assign(navigator, {
+      clipboard: { writeText },
+    })
+
+    const wallet = createWalletSummary({
+      institution: 'Bank Jago',
+      name: '109254920681',
+      type: 'bank',
+    })
+
+    render(
+      <MemoryRouter>
+        <WalletCard wallet={wallet} />
+      </MemoryRouter>,
+    )
+
+    const copyBtn = screen.getByRole('button', {
+      name: /salin nomor Bank Jago/i,
+    })
+    expect(copyBtn).toBeInTheDocument()
+
+    fireEvent.click(copyBtn)
+
+    expect(writeText).toHaveBeenCalledWith(
+      '🏦 Bank Jago\nNo. Rekening: 109254920681',
+    )
   })
 })

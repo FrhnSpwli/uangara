@@ -8,6 +8,7 @@ import {
 
 export interface TransactionFormValues {
   amount: string
+  categoryId?: string | null
   description: string
   destinationWalletId?: string
   fee?: string
@@ -119,6 +120,7 @@ export function validateTransactionForm(
       return {
         input: {
           amount: amount.databaseValue,
+          categoryId: values.categoryId ?? null,
           description,
           destinationWalletId,
           fee: fee.databaseValue,
@@ -172,6 +174,7 @@ export function validateTransactionForm(
   return {
     input: {
       amount: amount.databaseValue,
+      categoryId: values.categoryId ?? null,
       description,
       kind: values.kind as TransactionKind,
       notes: notes || null,

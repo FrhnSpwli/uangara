@@ -2,6 +2,8 @@ import { type FormEvent, useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 
 import { formatMoney } from '../../../utils/money'
+import { CategoryBadge } from '../../categories/components/CategoryBadge'
+import { useBalancePrivacy } from '../../preferences/context/useBalancePrivacy'
 import { useWalletService } from '../../wallets/context/useWalletService'
 import { TransactionForm } from '../components/TransactionForm'
 import { useTransactionService } from '../context/useTransactionService'
@@ -26,6 +28,7 @@ function valuesFromTransaction(
 ): TransactionFormValues {
   return {
     amount: transaction.amount,
+    categoryId: transaction.categoryId ?? null,
     description: transaction.description,
     kind: transaction.kind,
     notes: transaction.notes ?? '',
@@ -38,6 +41,7 @@ export function TransactionDetailPage() {
   const { transactionId } = useParams()
   const transactionService = useTransactionService()
   const walletService = useWalletService()
+  const { isHidden } = useBalancePrivacy()
   const [transaction, setTransaction] = useState<TransactionDetail | null>(null)
   const [wallets, setWallets] = useState<TransactionWalletOption[]>([])
   const [values, setValues] = useState<TransactionFormValues | null>(null)
@@ -75,18 +79,47 @@ export function TransactionDetailPage() {
         return
       }
 
-      const options = activeWallets.map((wallet) => ({
-        archivedAt: wallet.archivedAt,
-        id: wallet.id,
-        name: wallet.name,
-      }))
+      const options: TransactionWalletOption[] = activeWallets.map(
+        (wallet) => ({
+          archivedAt: wallet.archivedAt,
+          balance: wallet.balance,
+          id: wallet.id,
+          institution: wallet.institution,
+          name: wallet.name,
+          type: wallet.type,
+        }),
+      )
 
       if (!options.some((wallet) => wallet.id === loadedTransaction.walletId)) {
-        options.push({
-          archivedAt: loadedTransaction.walletArchivedAt,
-          id: loadedTransaction.walletId,
-          name: loadedTransaction.walletName,
-        })
+        try {
+          const historicalWallet = await walletService.getWallet(
+            loadedTransaction.walletId,
+          )
+          if (historicalWallet) {
+            options.push({
+              archivedAt:
+                loadedTransaction.walletArchivedAt ??
+                historicalWallet.archivedAt,
+              balance: historicalWallet.balance,
+              id: historicalWallet.id,
+              institution: historicalWallet.institution,
+              name: historicalWallet.name,
+              type: historicalWallet.type,
+            })
+          } else {
+            options.push({
+              archivedAt: loadedTransaction.walletArchivedAt,
+              id: loadedTransaction.walletId,
+              name: loadedTransaction.walletName,
+            })
+          }
+        } catch {
+          options.push({
+            archivedAt: loadedTransaction.walletArchivedAt,
+            id: loadedTransaction.walletId,
+            name: loadedTransaction.walletName,
+          })
+        }
       }
 
       setNotFound(false)
@@ -247,6 +280,13 @@ export function TransactionDetailPage() {
           <p className="text-sm font-semibold text-teal-300 capitalize">
             {transaction.kind}
           </p>
+          {transaction.categoryName ? (
+            <CategoryBadge
+              color={transaction.categoryColor}
+              icon={transaction.categoryIcon}
+              name={transaction.categoryName}
+            />
+          ) : null}
           {deleted ? (
             <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs font-semibold">
               Deleted
@@ -273,7 +313,7 @@ export function TransactionDetailPage() {
           }`}
         >
           {transaction.kind === 'income' ? '+' : '−'}
-          {formatMoney(transaction.amount)}
+          {formatMoney(transaction.amount, { hide: isHidden })}
         </p>
       </div>
 

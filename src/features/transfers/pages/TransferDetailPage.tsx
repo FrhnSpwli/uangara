@@ -2,6 +2,8 @@ import { type FormEvent, useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 
 import { formatMoney } from '../../../utils/money'
+import { CategoryBadge } from '../../categories/components/CategoryBadge'
+import { useBalancePrivacy } from '../../preferences/context/useBalancePrivacy'
 import { toLocalDateTimeValue } from '../../transactions/utils/validation'
 import { useWalletService } from '../../wallets/context/useWalletService'
 import { TransferForm } from '../components/TransferForm'
@@ -19,6 +21,7 @@ type PendingAction = 'delete' | 'restore' | 'update' | null
 function valuesFromTransfer(transfer: TransferDetail): TransferFormValues {
   return {
     amount: transfer.amount,
+    categoryId: transfer.categoryId ?? null,
     description: transfer.description,
     destinationWalletId: transfer.destinationWalletId,
     fee: transfer.feeAmount,
@@ -32,6 +35,7 @@ export function TransferDetailPage() {
   const { transferId } = useParams()
   const transferService = useTransferService()
   const walletService = useWalletService()
+  const { isHidden } = useBalancePrivacy()
   const [transfer, setTransfer] = useState<TransferDetail | null>(null)
   const [wallets, setWallets] = useState<TransferWalletOption[]>([])
   const [values, setValues] = useState<TransferFormValues | null>(null)
@@ -66,8 +70,11 @@ export function TransferDetailPage() {
 
       const options: TransferWalletOption[] = activeWallets.map((wallet) => ({
         archivedAt: wallet.archivedAt,
+        balance: wallet.balance,
         id: wallet.id,
+        institution: wallet.institution,
         name: wallet.name,
+        type: wallet.type,
       }))
 
       for (const historical of [
@@ -83,7 +90,26 @@ export function TransferDetailPage() {
         },
       ]) {
         if (!options.some((wallet) => wallet.id === historical.id)) {
-          options.push(historical)
+          try {
+            const historicalWallet = await walletService.getWallet(
+              historical.id,
+            )
+            if (historicalWallet) {
+              options.push({
+                archivedAt:
+                  historical.archivedAt ?? historicalWallet.archivedAt,
+                balance: historicalWallet.balance,
+                id: historicalWallet.id,
+                institution: historicalWallet.institution,
+                name: historicalWallet.name,
+                type: historicalWallet.type,
+              })
+            } else {
+              options.push(historical)
+            }
+          } catch {
+            options.push(historical)
+          }
         }
       }
 
@@ -178,10 +204,10 @@ export function TransferDetailPage() {
           It may not exist or may belong to another user.
         </p>
         <Link
-          className="mt-5 inline-flex font-semibold text-teal-700"
+          className="mt-5 inline-flex text-sm font-medium text-emerald-800 transition hover:text-emerald-950 focus:underline"
           to="/app/transactions"
         >
-          Back to transactions
+          ← Back to transactions
         </Link>
       </section>
     )
@@ -190,17 +216,26 @@ export function TransferDetailPage() {
   return (
     <section className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
       <Link
-        className="text-sm font-semibold text-teal-700"
+        className="text-sm font-medium text-emerald-800 transition hover:text-emerald-950 focus:underline"
         to="/app/transactions"
       >
-        Back to transactions
+        ← Back to transactions
       </Link>
       <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-brand-700 text-sm font-semibold uppercase">
-              Wallet transfer
-            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-brand-700 text-sm font-semibold uppercase">
+                Wallet transfer
+              </p>
+              {transfer.categoryName ? (
+                <CategoryBadge
+                  color={transfer.categoryColor}
+                  icon={transfer.categoryIcon}
+                  name={transfer.categoryName}
+                />
+              ) : null}
+            </div>
             <h1 className="mt-2 text-3xl font-bold text-slate-950">
               {transfer.description}
             </h1>
@@ -220,13 +255,13 @@ export function TransferDetailPage() {
           <div>
             <dt className="text-sm text-slate-500">Principal</dt>
             <dd className="mt-1 font-semibold">
-              {formatMoney(transfer.amount)}
+              {formatMoney(transfer.amount, { hide: isHidden })}
             </dd>
           </div>
           <div>
             <dt className="text-sm text-slate-500">Admin fee</dt>
             <dd className="mt-1 font-semibold">
-              {formatMoney(transfer.feeAmount)}
+              {formatMoney(transfer.feeAmount, { hide: isHidden })}
             </dd>
           </div>
           <div>
@@ -237,6 +272,7 @@ export function TransferDetailPage() {
                 (
                   BigInt(transfer.amount) + BigInt(transfer.feeAmount)
                 ).toString(),
+                { hide: isHidden },
               )}
             </dd>
           </div>

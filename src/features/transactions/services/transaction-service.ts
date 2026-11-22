@@ -31,6 +31,10 @@ function toTransactionSummary(row: TransactionRow): TransactionSummary {
 
   return {
     amount: row.amount,
+    categoryColor: row.category_color,
+    categoryIcon: row.category_icon,
+    categoryId: row.category_id,
+    categoryName: row.category_name,
     createdAt: row.created_at,
     deletedAt: row.deleted_at,
     description: row.description,
@@ -56,6 +60,10 @@ function toFinancialTransactionSummary(
 
   const common = {
     amount: row.amount,
+    categoryColor: row.category_color,
+    categoryIcon: row.category_icon,
+    categoryId: row.category_id,
+    categoryName: row.category_name,
     createdAt: row.created_at,
     deletedAt: row.deleted_at,
     description: row.description,
@@ -126,6 +134,7 @@ function rpcInput(input: IncomeExpenseTransactionInput) {
 
   return {
     p_amount: input.amount,
+    p_category_id: input.categoryId ?? null,
     p_description: input.description,
     p_kind: input.kind,
     p_notes: input.notes,
@@ -142,7 +151,7 @@ export function createSupabaseTransactionService(
       let query = client
         .from('transaction_feed')
         .select(
-          'transaction_id,user_id,kind,wallet_id,wallet_name,wallet_archived_at,source_wallet_id,source_wallet_name,source_wallet_archived_at,destination_wallet_id,destination_wallet_name,destination_wallet_archived_at,description,notes,amount,fee_amount,occurred_at,deleted_at,created_at,updated_at',
+          'transaction_id,user_id,kind,wallet_id,wallet_name,wallet_archived_at,source_wallet_id,source_wallet_name,source_wallet_archived_at,destination_wallet_id,destination_wallet_name,destination_wallet_archived_at,category_id,category_name,category_icon,category_color,description,notes,amount,fee_amount,occurred_at,deleted_at,created_at,updated_at',
         )
         .order('occurred_at', { ascending: false })
         .order('created_at', { ascending: false })
@@ -167,7 +176,7 @@ export function createSupabaseTransactionService(
       let query = client
         .from('transaction_feed')
         .select(
-          'transaction_id,user_id,kind,wallet_id,wallet_name,wallet_archived_at,source_wallet_id,source_wallet_name,source_wallet_archived_at,destination_wallet_id,destination_wallet_name,destination_wallet_archived_at,description,notes,amount,fee_amount,occurred_at,deleted_at,created_at,updated_at',
+          'transaction_id,user_id,kind,wallet_id,wallet_name,wallet_archived_at,source_wallet_id,source_wallet_name,source_wallet_archived_at,destination_wallet_id,destination_wallet_name,destination_wallet_archived_at,category_id,category_name,category_icon,category_color,description,notes,amount,fee_amount,occurred_at,deleted_at,created_at,updated_at',
         )
         .is('deleted_at', null)
         .order('occurred_at', { ascending: false })
@@ -195,7 +204,7 @@ export function createSupabaseTransactionService(
       const { data, error } = await client
         .from('income_expense_transactions')
         .select(
-          'transaction_id,user_id,kind,wallet_id,wallet_name,wallet_archived_at,description,notes,amount,occurred_at,deleted_at,created_at,updated_at',
+          'transaction_id,user_id,kind,wallet_id,wallet_name,wallet_archived_at,category_id,category_name,category_icon,category_color,description,notes,amount,occurred_at,deleted_at,created_at,updated_at',
         )
         .eq('transaction_id', transactionId)
         .maybeSingle()

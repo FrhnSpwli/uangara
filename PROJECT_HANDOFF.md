@@ -5,12 +5,12 @@
 ## Handoff metadata
 
 - **Last updated:** 2026-11-22
-- **Current working branch:** `feat/wallet-cards-and-recap`
-- **Accepted `main` baseline:** `3bfb742`
+- **Current working branch:** `feat/hide-balance-and-categories`
+- **Accepted `main` baseline:** `0c22902`
 - **Phase 5 planning commit:** `8fa5c4132dcf582cad3ab590a91680b630e5ba0c`
 - **Phase 5 implementation commit:** `5261e3163572d0003016288b94d8de8f9ccca24a`
-- **Current phase state:** UI enhancements, bank/e-wallet card styling, account number labeling, total balance hero, and financial recap sections implemented and verified
-- **Next permitted action:** review and explore the new dashboard and wallet UI
+- **Current phase state:** Privacy mode (Hide Balance) and Transaction Categorization (Stage 2) implemented and verified across migrations, remote Supabase, services, components, pages, and test suites
+- **Next permitted action:** review and merge pull request #12 (Stage 1 & Stage 2) or await next user directive
 - **Not authorized:** merging this follow-up without the user's review
 - **Production Auth action required:** set the Supabase Site URL to `https://uangara.vercel.app` and allow-list `https://uangara.vercel.app/auth/sign-in?confirmed=true`, then request a new confirmation email
 
@@ -57,7 +57,11 @@ The detailed Phase 5 contract and implementation record are in [`docs/phases/PHA
 - Interactive Financial Recap Section with instant switching between Today (Hari Ini), Weekly (Minggu Ini), Monthly (Bulan Ini), and Custom (Kustom date range), categorizing income, expense (including transfer fee), and net cashflow.
 - Visual card selectors for wallet creation (wallet type with icons, provider/bank with brand logos).
 - Card-based transaction creation flow with 3 unified transaction kinds: Pengeluaran (Expense), Pemasukan (Income), and Transfer, with transfer flow merged directly inside the main transaction form.
-- Visual wallet card selector (`WalletCardSelector`) displaying provider logo, account number/name, wallet balance, and type icon, limited to 5 cards with an expandable "Lainnya" tile and search filter when > 6 wallets.
+- Visual wallet card selector (`WalletCardSelector`) displaying provider logo, account number/name, wallet balance, and type icon, limited to 5 cards with an expandable "Lainnya" tile and search filter when > 6 wallets. Consistent rich card display across create transaction, edit transaction, create transfer, and edit transfer pages.
+- Unified navigation link styling ("← Back to transactions") across transaction and transfer detail and creation views.
+- Wallet clipboard sharing: integrated quick copy button on each `WalletCard` and `WalletDetailPage` to copy account number and provider with instant visual feedback, and a "Salin Semua" button (`CopyAllWalletsButton`) on the homepage and wallet list page to copy all active wallets formatted catchily and neatly for messaging apps.
+- Global Privacy Mode (Hide Balance) with instant toggle button (`BalancePrivacyToggle`) in the header navbar and Accumulated Balance Hero Card, masking financial numbers (`Rp ••••••` / `+Rp ••••••` / `-Rp ••••••`) across the dashboard, wallet cards, card selector, financial recap section, transaction list feed, and wallet/transaction detail pages, with persistent preference storage (`localStorage`).
+- Transaction Categorization (Stage 2) for Pengeluaran (Expense), Pemasukan (Income), and Transfer purpose (e.g. Top Up, Pindah Rekening, Nabung/Investasi). Includes system-seeded categories, interactive visual category card selector (`CategoryCardSelector`) with curated icons and colors, responsive and accessible selection, automatic category state resetting when switching transaction kinds in the unified form, and category badge pills (`CategoryBadge`) rendered across the transaction feed and detail pages.
 - Atomic income and expense creation, direct editing, soft deletion, restoration, and recent/deleted visibility.
 - Atomic wallet-to-wallet transfer creation, direct editing, soft deletion, restoration, optional fee handling, and retry-safe idempotency.
 - A unified minimal recent financial-event feed for income, expense, and transfers. Full history/search remains Phase 6.
@@ -95,15 +99,18 @@ Versioned migrations are immutable once applied:
 3. `20260901010000_add_e_money_wallet_type.sql`
 4. `20260902000000_add_income_expense_transactions.sql`
 5. `20260904000000_add_wallet_transfers.sql`
+6. `20260905000000_add_transaction_categories.sql`
+7. `20260905010000_fix_transfer_lint.sql`
 
 Core structures:
 
 - `profiles`: minimal one-to-one extension of `auth.users`.
 - `wallets`: user-owned money locations with metadata and `archived_at`; no balance column.
-- `transactions`: user-owned financial events with kind, timestamps, metadata, `deleted_at`, and transfer-create idempotency where applicable.
+- `categories`: system-seeded (`is_system = true`, `user_id IS NULL`) and user-created categories for `expense`, `income`, and `transfer`, with RLS policies allowing authenticated users to read system categories and manage their own.
+- `transactions`: user-owned financial events with kind, optional `category_id` (FK to `categories.id` with `ON DELETE SET NULL`), timestamps, metadata, `deleted_at`, and transfer-create idempotency where applicable.
 - `wallet_movements`: signed `BIGINT` ledger effects with explicit roles and owner-qualified transaction/wallet relationships.
 - `wallet_balances`: security-invoker view summing movements from active transactions.
-- `transaction_feed`: security-invoker minimal read model for income, expense, and transfer events.
+- `income_expense_transactions` & `transaction_feed`: security-invoker views surfacing transaction fields alongside joined category metadata (`category_name`, `category_icon`, `category_color`).
 
 Critical financial writes are hardened `SECURITY DEFINER` RPCs with an empty/pinned search path, ownership derived from `auth.uid()`, narrow authenticated execution grants, input validation, and transactional atomicity. Relevant RPC families cover wallet/opening-balance lifecycle, income/expense lifecycle, and transfer lifecycle. Consult the migrations and [`src/types/database.ts`](src/types/database.ts) for exact signatures.
 
@@ -140,7 +147,8 @@ The latest recorded verification passed:
 - TypeScript (`tsc -b --pretty false`): passed with 0 errors.
 - ESLint (`eslint . --max-warnings 0`): passed with 0 errors and 0 warnings.
 - Prettier: formatted and verified across all changed and added files.
-- Frontend/static test suite: 125/125 passed across 21 test files with Vitest.
+- Frontend/static test suite: 171/171 passed across 30 test files with Vitest.
+- Supabase remote migration & lint: applied up through `20260905010000`, remote database lint passed with 0 errors.
 - Production build (`vite build`): passed; static assets, manifest, and service worker generated.
 - `git diff --check`: passed with zero whitespace or line ending issues.
 - Secret audit: `.env` ignored; no tracked privileged credentials, database passwords, or CLI access tokens detected.
@@ -226,6 +234,9 @@ Keep the recent-update list concise—retain roughly the latest ten material ent
 
 ## Recent handoff updates
 
+- **2026-11-22 — Wallet Edit View Consistency, Back Navigation Alignment & Wallet Copy Features:** Resolved wallet card option mapping in `TransactionDetailPage` and `TransferDetailPage` so wallet selection displays full institution brand logos, provider names, and balances matching `CreateTransactionPage`. Standardized transfer back-navigation link to `← Back to transactions` with matching emerald typography. Added single wallet account number and provider copy button on `WalletCard` and `WalletDetailPage`, and added `CopyAllWalletsButton` on `AuthenticatedHomePage` and `WalletListPage` to copy all accounts with clean emojis, labels, and catchy formatting. Verified with 171/171 tests passing across 30 test files, TypeScript 0 errors, ESLint 0 warnings, and production build succeeded.
+- **2026-11-22 — Stage 2: Transaction Categorization Implementation:** Added transaction category support across schema, remote Supabase, RPCs, service layer, and UI. Created `categories` table with system seeds (8 Expense, 6 Income, 5 Transfer purposes), RLS policies, and added `category_id` to `transactions`. Updated atomic RPCs (`create_income_expense_transaction`, `update_income_expense_transaction`, `create_transfer`, `update_transfer`) to validate category ownership, kind compatibility, and active status. Updated views (`income_expense_transactions`, `transaction_feed`). Added `CategoryService`, `CategoryServiceProvider`, `CategoryCardSelector`, `CategoryBadge`, and `CategoryIcon`. Integrated category selector into unified `TransactionForm` and `TransferForm`, resetting category selection automatically when switching kinds, and integrated badges into transaction and transfer feed/detail pages. Verified with 159/159 tests passing, TypeScript 0 errors, ESLint 0 warnings, Prettier clean, remote Supabase migration pushed and linted with 0 errors, and production build succeeded.
+- **2026-11-22 — Stage 1: Privacy Mode (Hide Balance) Implementation:** Added a global balance privacy state (`BalancePrivacyProvider`, `useBalancePrivacy`) persisted in `localStorage` under `uangara:hide_balance`. Added interactive `BalancePrivacyToggle` with accessible eye/eye-slash icons on both the application header and the Accumulated Balance Hero Card. Integrated privacy masking (`Rp ••••••`) via `formatMoney(value, { hide: isHidden })` across `AccumulatedBalanceCard` (total saldo & MTD recap), `WalletCard`, `WalletCardSelector`, `FinancialRecapSection`, `TransactionListPage` (`displayAmount`), `WalletDetailPage`, `TransactionDetailPage`, and `TransferDetailPage`. Verified with comprehensive unit/integration test suite: 145/145 tests passed, TypeScript 0 errors, ESLint 0 warnings, Prettier clean, production build passed.
 - **2026-11-22 — Card-based Transaction Form, Merged Transfer Flow, Source/Destination Mutual Exclusion & Wallet Detail Layout:** Merged wallet transfers directly into the main transaction form (`/app/transactions/new`), expanding transaction types to three: Pengeluaran (Expense), Pemasukan (Income), and Transfer, selectable via interactive visual cards. Replaced wallet dropdowns with `WalletCardSelector` showing provider logo, account number/name, wallet balance, and wallet type icon, with a 5-card maximum limit and expandable "Lainnya" tile with quick search when > 6 wallets. Enforced mutual exclusion between source and destination wallets (disabling the selected source from destination options and vice-versa). Removed the redundant "Transfer money" buttons from both the homepage (`/app`) and the transactions page (`/app/transactions`), and added the interactive `FinancialRecapSection` directly to the transactions page. Reorganized the wallet detail page (`/app/wallets/:id`) to a clean vertical single-column layout so provider cards and forms display comfortably without horizontal truncation. 135/135 tests passed.
 - **2026-11-22 — Visual Card Selectors for Wallet Type and Provider:** Replaced dropdown select menus in wallet create/edit forms with interactive visual card selectors featuring wallet type SVG icons and Indonesian institution brand logos. Preserved accessible hidden select controls for full backward compatibility. 125/125 tests passed.
 - **2026-11-22 — Dashboard & Wallet Card UI Enhancements & Financial Recap:** Added bank and e-wallet card layouts with Indonesian institution brand logos, wallet type icons, adaptive "Account number" / "No. Rekening" labeling for banks and phone/account numbers for e-wallets. Added the Total Accumulated Balance Hero Card with MTD income and expense recap. Added an interactive single-section Financial Recap with Today, Weekly, Monthly, and Custom date ranges categorizing income, expense (including transfer fee), and net cashflow. 125/125 tests passed.

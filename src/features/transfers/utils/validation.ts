@@ -3,6 +3,7 @@ import type { TransferInput } from '../types'
 
 export interface TransferFormValues {
   amount: string
+  categoryId?: string | null
   description: string
   destinationWalletId: string
   fee: string
@@ -81,6 +82,7 @@ export function validateTransferForm(
   return {
     input: {
       amount: amount.databaseValue,
+      categoryId: values.categoryId ?? null,
       description,
       destinationWalletId: values.destinationWalletId,
       fee: fee.databaseValue,

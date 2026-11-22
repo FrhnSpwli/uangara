@@ -1,6 +1,9 @@
+import { type MouseEvent, useState } from 'react'
 import { Link } from 'react-router'
 
+import { useBalancePrivacy } from '../../preferences/context/useBalancePrivacy'
 import type { WalletSummary } from '../types'
+import { copyToClipboard, formatSingleWalletCopy } from '../utils/clipboard'
 import { formatMoney } from '../utils/money'
 import { getWalletTypeLabel } from '../utils/validation'
 import { WalletBrandLogo } from './WalletBrandLogo'
@@ -69,9 +72,22 @@ function getAccountLabel(type: WalletSummary['type']): string {
 }
 
 export function WalletCard({ wallet }: WalletCardProps) {
+  const { isHidden } = useBalancePrivacy()
+  const [copied, setCopied] = useState(false)
   const themeClass = getCardTheme(wallet)
   const isBankOrCard = wallet.type === 'bank' || wallet.type === 'e_money'
   const accountLabel = getAccountLabel(wallet.type)
+
+  const handleCopy = async (e: MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const text = formatSingleWalletCopy(wallet)
+    const success = await copyToClipboard(text)
+    if (success) {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
 
   return (
     <Link
@@ -136,9 +152,54 @@ export function WalletCard({ wallet }: WalletCardProps) {
           <span className="text-[10px] font-medium uppercase tracking-wider text-white/60">
             {accountLabel}
           </span>
-          <p className="font-mono text-sm font-semibold tracking-wide text-white/95 sm:text-base">
-            {wallet.name}
-          </p>
+          <div className="mt-0.5 flex items-center justify-end gap-1.5">
+            <p className="font-mono text-sm font-semibold tracking-wide text-white/95 sm:text-base">
+              {wallet.name}
+            </p>
+            <button
+              aria-label={`Salin nomor ${wallet.institution || wallet.name}`}
+              className={`inline-flex items-center justify-center rounded-md p-1 transition focus:outline-none focus:ring-2 focus:ring-white/40 ${
+                copied
+                  ? 'bg-emerald-500/30 text-emerald-300'
+                  : 'bg-white/10 text-white/80 hover:bg-white/20 hover:text-white'
+              }`}
+              onClick={(e) => void handleCopy(e)}
+              title={copied ? 'Tersalin!' : 'Salin nomor & provider'}
+              type="button"
+            >
+              {copied ? (
+                <svg
+                  aria-hidden="true"
+                  className="size-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="m4.5 12.75 6 6 9-13.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  aria-hidden="true"
+                  className="size-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -148,7 +209,7 @@ export function WalletCard({ wallet }: WalletCardProps) {
           Saldo
         </span>
         <p className="mt-0.5 text-xl font-extrabold tracking-tight text-white sm:text-2xl">
-          {formatMoney(wallet.balance)}
+          {formatMoney(wallet.balance, { hide: isHidden })}
         </p>
       </div>
     </Link>

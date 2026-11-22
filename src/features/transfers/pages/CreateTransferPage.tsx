@@ -131,10 +131,10 @@ export function CreateTransferPage() {
   return (
     <section className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
       <Link
-        className="text-sm font-semibold text-teal-700"
+        className="text-sm font-medium text-emerald-800 transition hover:text-emerald-950 focus:underline"
         to="/app/transactions"
       >
-        Back to transactions
+        ← Back to transactions
       </Link>
       <p className="text-brand-700 mt-6 text-sm font-semibold tracking-wide uppercase">
         Wallet to wallet

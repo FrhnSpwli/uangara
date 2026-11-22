@@ -7,6 +7,8 @@ import {
   calculateRecap,
   getMtdRange,
 } from '../../transactions/utils/recap'
+import { BalancePrivacyToggle } from '../../preferences/components/BalancePrivacyToggle'
+import { useBalancePrivacy } from '../../preferences/context/useBalancePrivacy'
 import { WalletServiceContext } from '../context/wallet-service-context'
 import type { WalletSummary } from '../types'
 import { formatMoney } from '../utils/money'
@@ -14,6 +16,7 @@ import { formatMoney } from '../utils/money'
 export function AccumulatedBalanceCard() {
   const walletService = useContext(WalletServiceContext)
   const transactionService = useContext(TransactionServiceContext)
+  const { isHidden } = useBalancePrivacy()
 
   const [wallets, setWallets] = useState<WalletSummary[]>([])
   const [mtdRecap, setMtdRecap] = useState<FinancialRecapSummary | null>(null)
@@ -86,11 +89,17 @@ export function AccumulatedBalanceCard() {
           </div>
 
           <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-            {loading ? 'Memuat saldo…' : formatMoney(totalBalance)}
+            {loading
+              ? 'Memuat saldo…'
+              : formatMoney(totalBalance, { hide: isHidden })}
           </h2>
           <p className="mt-1 text-xs text-slate-400">
             Akumulasi dari seluruh dompet aktif Anda
           </p>
+        </div>
+
+        <div className="shrink-0 self-start">
+          <BalancePrivacyToggle variant="dark" />
         </div>
       </div>
 
@@ -134,7 +143,9 @@ export function AccumulatedBalanceCard() {
               </span>
             </div>
             <p className="mt-1.5 text-lg font-bold text-emerald-400">
-              {loading ? '…' : `+${formatMoney(mtdRecap?.incomeTotal ?? '0')}`}
+              {loading
+                ? '…'
+                : `+${formatMoney(mtdRecap?.incomeTotal ?? '0', { hide: isHidden })}`}
             </p>
             <p className="text-[11px] text-emerald-300/70">
               {mtdRecap?.incomeCount ?? 0} transaksi masuk
@@ -163,7 +174,9 @@ export function AccumulatedBalanceCard() {
               </span>
             </div>
             <p className="mt-1.5 text-lg font-bold text-rose-400">
-              {loading ? '…' : `-${formatMoney(mtdRecap?.expenseTotal ?? '0')}`}
+              {loading
+                ? '…'
+                : `-${formatMoney(mtdRecap?.expenseTotal ?? '0', { hide: isHidden })}`}
             </p>
             <p className="text-[11px] text-rose-300/70">
               {mtdRecap?.expenseCount ?? 0} transaksi keluar
@@ -193,6 +206,7 @@ export function AccumulatedBalanceCard() {
                 ? '…'
                 : `${BigInt(mtdRecap?.netDifference ?? '0') >= 0n ? '+' : ''}${formatMoney(
                     mtdRecap?.netDifference ?? '0',
+                    { hide: isHidden },
                   )}`}
             </p>
             <p className="text-[11px] text-teal-300/70">

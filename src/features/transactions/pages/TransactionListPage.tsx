@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 
 import { formatMoney } from '../../../utils/money'
+import { CategoryBadge } from '../../categories/components/CategoryBadge'
+import { useBalancePrivacy } from '../../preferences/context/useBalancePrivacy'
 import { FinancialRecapSection } from '../components/FinancialRecapSection'
 import { useTransactionService } from '../context/useTransactionService'
 import { getTransactionErrorMessage } from '../services/transaction-errors'
@@ -12,22 +14,26 @@ const occurredAtFormatter = new Intl.DateTimeFormat('id-ID', {
   timeStyle: 'short',
 })
 
-function displayAmount(transaction: FinancialTransactionSummary) {
+function displayAmount(
+  transaction: FinancialTransactionSummary,
+  isHidden?: boolean,
+) {
   if (transaction.kind === 'transfer') {
     return transaction.feeAmount === '0'
-      ? formatMoney(transaction.amount)
-      : formatMoney(transaction.amount) +
+      ? formatMoney(transaction.amount, { hide: isHidden })
+      : formatMoney(transaction.amount, { hide: isHidden }) +
           ' + ' +
-          formatMoney(transaction.feeAmount) +
+          formatMoney(transaction.feeAmount, { hide: isHidden }) +
           ' fee'
   }
 
   const prefix = transaction.kind === 'income' ? '+' : '−'
-  return `${prefix}${formatMoney(transaction.amount)}`
+  return `${prefix}${formatMoney(transaction.amount, { hide: isHidden })}`
 }
 
 export function TransactionListPage() {
   const service = useTransactionService()
+  const { isHidden } = useBalancePrivacy()
   const [mode, setMode] = useState<TransactionListMode>('active')
   const [transactions, setTransactions] = useState<
     FinancialTransactionSummary[]
@@ -176,6 +182,13 @@ export function TransactionListPage() {
                     <h2 className="font-semibold text-slate-950">
                       {transaction.description}
                     </h2>
+                    {transaction.categoryName ? (
+                      <CategoryBadge
+                        color={transaction.categoryColor}
+                        icon={transaction.categoryIcon}
+                        name={transaction.categoryName}
+                      />
+                    ) : null}
                     {transaction.deletedAt ? (
                       <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
                         Deleted
@@ -198,7 +211,7 @@ export function TransactionListPage() {
                         : 'text-slate-700'
                   }`}
                 >
-                  {displayAmount(transaction)}
+                  {displayAmount(transaction, isHidden)}
                 </p>
               </Link>
             </li>

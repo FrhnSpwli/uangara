@@ -56,7 +56,18 @@ const idrFormatter = new Intl.NumberFormat('id-ID', {
   style: 'currency',
 })
 
-export function formatMoney(value: string) {
+export function formatMoney(value: string, options?: { hide?: boolean }) {
+  if (options?.hide) {
+    try {
+      if (BigInt(value) < 0n) {
+        return '-Rp ••••••'
+      }
+    } catch {
+      // ignore
+    }
+    return 'Rp ••••••'
+  }
+
   try {
     return idrFormatter.format(BigInt(value))
   } catch {

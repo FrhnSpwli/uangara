@@ -28,6 +28,7 @@ describe('transaction service boundary', () => {
 
     expect(rpc).toHaveBeenCalledWith('create_income_expense_transaction', {
       p_amount: 500000,
+      p_category_id: null,
       p_description: 'Salary',
       p_kind: 'income',
       p_notes: null,

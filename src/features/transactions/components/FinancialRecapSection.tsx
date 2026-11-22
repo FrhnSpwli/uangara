@@ -1,5 +1,7 @@
 import { useContext, useEffect, useMemo, useState } from 'react'
 
+import { useBalancePrivacy } from '../../preferences/context/useBalancePrivacy'
+import { formatMoney } from '../../wallets/utils/money'
 import { TransactionServiceContext } from '../context/transaction-service-context'
 import type { FinancialTransactionSummary } from '../types'
 import {
@@ -11,10 +13,10 @@ import {
   getWeekRange,
   type RecapPeriod,
 } from '../utils/recap'
-import { formatMoney } from '../../wallets/utils/money'
 
 export function FinancialRecapSection() {
   const service = useContext(TransactionServiceContext)
+  const { isHidden } = useBalancePrivacy()
 
   const [period, setPeriod] = useState<RecapPeriod>('today')
   const [customStart, setCustomStart] = useState(() => {
@@ -212,7 +214,9 @@ export function FinancialRecapSection() {
             </span>
           </div>
           <p className="mt-2 text-2xl font-bold tracking-tight text-emerald-700">
-            {loading ? '…' : `+${formatMoney(recap.incomeTotal)}`}
+            {loading
+              ? '…'
+              : `+${formatMoney(recap.incomeTotal, { hide: isHidden })}`}
           </p>
           <p className="mt-1 text-xs text-emerald-600">
             {recap.incomeCount} transaksi pemasukan
@@ -241,7 +245,9 @@ export function FinancialRecapSection() {
             </span>
           </div>
           <p className="mt-2 text-2xl font-bold tracking-tight text-rose-700">
-            {loading ? '…' : `-${formatMoney(recap.expenseTotal)}`}
+            {loading
+              ? '…'
+              : `-${formatMoney(recap.expenseTotal, { hide: isHidden })}`}
           </p>
           <p className="mt-1 text-xs text-rose-600">
             {recap.expenseCount} pengeluaran
@@ -270,6 +276,7 @@ export function FinancialRecapSection() {
               ? '…'
               : `${BigInt(recap.netDifference) >= 0n ? '+' : ''}${formatMoney(
                   recap.netDifference,
+                  { hide: isHidden },
                 )}`}
           </p>
           <p className="mt-1 text-xs text-slate-500">
@@ -347,11 +354,11 @@ export function FinancialRecapSection() {
                   <div className="text-right">
                     <p className={amountColor}>
                       {amountPrefix}
-                      {formatMoney(tx.amount)}
+                      {formatMoney(tx.amount, { hide: isHidden })}
                     </p>
                     {isTransfer && BigInt(tx.feeAmount) > 0n ? (
                       <p className="text-[10px] text-rose-600">
-                        Biaya: {formatMoney(tx.feeAmount)}
+                        Biaya: {formatMoney(tx.feeAmount, { hide: isHidden })}
                       </p>
                     ) : null}
                   </div>

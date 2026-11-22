@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 
 import { FinancialRecapSection } from '../../transactions/components/FinancialRecapSection'
 import { AccumulatedBalanceCard } from '../../wallets/components/AccumulatedBalanceCard'
+import { CopyAllWalletsButton } from '../../wallets/components/CopyAllWalletsButton'
 import { WalletCard } from '../../wallets/components/WalletCard'
 import { WalletServiceContext } from '../../wallets/context/wallet-service-context'
 import type { WalletSummary } from '../../wallets/types'
@@ -95,7 +96,10 @@ export function AuthenticatedHomePage() {
               Kartu rekening bank, e-wallet, dan tempat penyimpanan uang Anda
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {!loadingWallets && wallets.length > 0 ? (
+              <CopyAllWalletsButton wallets={wallets} />
+            ) : null}
             <Link
               className="rounded-lg px-3 py-1.5 text-xs font-semibold text-brand-700 hover:bg-brand-50"
               to="/app/wallets/new"
