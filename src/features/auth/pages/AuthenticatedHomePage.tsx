@@ -69,12 +69,6 @@ export function AuthenticatedHomePage() {
           </Link>
           <Link
             className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-100 shadow-sm transition"
-            to="/app/transfers/new"
-          >
-            Transfer money
-          </Link>
-          <Link
-            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-100 shadow-sm transition"
             to="/app/wallets"
           >
             View wallets

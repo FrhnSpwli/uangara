@@ -56,9 +56,16 @@ describe('authentication flow', () => {
         name: 'Your money locations start here.',
       }),
     ).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '+ Transaksi' })).toHaveAttribute(
+      'href',
+      '/app/transactions/new',
+    )
     expect(
-      screen.getByRole('link', { name: 'Transfer money' }),
-    ).toHaveAttribute('href', '/app/transfers/new')
+      screen.getAllByRole('link', { name: 'View wallets' })[0],
+    ).toHaveAttribute('href', '/app/wallets')
+    expect(
+      screen.queryByRole('link', { name: 'Transfer money' }),
+    ).not.toBeInTheDocument()
     expect(
       screen.queryByText(/transfers remain for a later phase/i),
     ).not.toBeInTheDocument()
