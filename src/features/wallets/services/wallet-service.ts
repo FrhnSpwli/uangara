@@ -13,6 +13,7 @@ import {
   type WalletType,
 } from '../types'
 import { SafeWalletError } from './wallet-errors'
+import { sortWalletsByType } from '../utils/sorting'
 
 type WalletBalanceRow = Database['public']['Views']['wallet_balances']['Row']
 type WalletOpeningRow =
@@ -76,7 +77,7 @@ export function createSupabaseWalletService(
         throw requestError('load your wallets')
       }
 
-      return data.map(toWalletSummary)
+      return sortWalletsByType(data.map(toWalletSummary))
     },
 
     async getWallet(walletId: string) {
