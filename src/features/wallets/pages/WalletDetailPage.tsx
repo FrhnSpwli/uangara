@@ -332,7 +332,7 @@ export function WalletDetailPage() {
         </p>
       ) : null}
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
+      <div className="mt-8 flex flex-col gap-6">
         <form
           className="space-y-5 rounded-2xl border border-slate-200 bg-white p-6"
           noValidate
