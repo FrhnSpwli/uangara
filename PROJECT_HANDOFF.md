@@ -223,6 +223,7 @@ Keep the recent-update list concise—retain roughly the latest ten material ent
 
 ## Recent handoff updates
 
+- **2026-11-22 — Visual Card Selectors for Wallet Type and Provider:** Replaced dropdown select menus in wallet create/edit forms with interactive visual card selectors featuring wallet type SVG icons and Indonesian institution brand logos. Preserved accessible hidden select controls for full backward compatibility. 125/125 tests passed.
 - **2026-11-22 — Dashboard & Wallet Card UI Enhancements & Financial Recap:** Added bank and e-wallet card layouts with Indonesian institution brand logos, wallet type icons, adaptive "Account number" / "No. Rekening" labeling for banks and phone/account numbers for e-wallets. Added the Total Accumulated Balance Hero Card with MTD income and expense recap. Added an interactive single-section Financial Recap with Today, Weekly, Monthly, and Custom date ranges categorizing income, expense (including transfer fee), and net cashflow. 125/125 tests passed.
 - **2026-11-22 — Phase 5 discoverability follow-up:** Added a direct authenticated homepage entry to the existing transfer flow and corrected stale Phase 5 acceptance wording. The follow-up awaits review; transfer backend behavior is unchanged.
 - **2026-11-22 — Production email confirmation hardening:** Added Vercel SPA rewrites, safe expired/invalid confirmation callback handling, regression tests, and exact Supabase production URL instructions. Remote Supabase URL Configuration still requires the documented dashboard change and a newly issued email.
