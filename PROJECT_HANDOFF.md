@@ -5,12 +5,12 @@
 ## Handoff metadata
 
 - **Last updated:** 2026-11-22
-- **Current working branch:** `feat/wallet-cards-and-recap`
-- **Accepted `main` baseline:** `3bfb742`
+- **Current working branch:** `feat/hide-balance-and-categories`
+- **Accepted `main` baseline:** `0c22902`
 - **Phase 5 planning commit:** `8fa5c4132dcf582cad3ab590a91680b630e5ba0c`
 - **Phase 5 implementation commit:** `5261e3163572d0003016288b94d8de8f9ccca24a`
-- **Current phase state:** UI enhancements, bank/e-wallet card styling, account number labeling, total balance hero, and financial recap sections implemented and verified
-- **Next permitted action:** review and explore the new dashboard and wallet UI
+- **Current phase state:** Privacy mode (Hide Balance) implemented and verified across application header, Accumulated Balance hero card, wallet cards, wallet selector, financial recap section, and detail pages
+- **Next permitted action:** implement transaction categories (Stage 2) or review privacy mode PR
 - **Not authorized:** merging this follow-up without the user's review
 - **Production Auth action required:** set the Supabase Site URL to `https://uangara.vercel.app` and allow-list `https://uangara.vercel.app/auth/sign-in?confirmed=true`, then request a new confirmation email
 
@@ -58,6 +58,7 @@ The detailed Phase 5 contract and implementation record are in [`docs/phases/PHA
 - Visual card selectors for wallet creation (wallet type with icons, provider/bank with brand logos).
 - Card-based transaction creation flow with 3 unified transaction kinds: Pengeluaran (Expense), Pemasukan (Income), and Transfer, with transfer flow merged directly inside the main transaction form.
 - Visual wallet card selector (`WalletCardSelector`) displaying provider logo, account number/name, wallet balance, and type icon, limited to 5 cards with an expandable "Lainnya" tile and search filter when > 6 wallets.
+- Global Privacy Mode (Hide Balance) with instant toggle button (`BalancePrivacyToggle`) in the header navbar and Accumulated Balance Hero Card, masking financial numbers (`Rp ••••••` / `+Rp ••••••` / `-Rp ••••••`) across the dashboard, wallet cards, card selector, financial recap section, transaction list feed, and wallet/transaction detail pages, with persistent preference storage (`localStorage`).
 - Atomic income and expense creation, direct editing, soft deletion, restoration, and recent/deleted visibility.
 - Atomic wallet-to-wallet transfer creation, direct editing, soft deletion, restoration, optional fee handling, and retry-safe idempotency.
 - A unified minimal recent financial-event feed for income, expense, and transfers. Full history/search remains Phase 6.
@@ -226,6 +227,7 @@ Keep the recent-update list concise—retain roughly the latest ten material ent
 
 ## Recent handoff updates
 
+- **2026-11-22 — Stage 1: Privacy Mode (Hide Balance) Implementation:** Added a global balance privacy state (`BalancePrivacyProvider`, `useBalancePrivacy`) persisted in `localStorage` under `uangara:hide_balance`. Added interactive `BalancePrivacyToggle` with accessible eye/eye-slash icons on both the application header and the Accumulated Balance Hero Card. Integrated privacy masking (`Rp ••••••`) via `formatMoney(value, { hide: isHidden })` across `AccumulatedBalanceCard` (total saldo & MTD recap), `WalletCard`, `WalletCardSelector`, `FinancialRecapSection`, `TransactionListPage` (`displayAmount`), `WalletDetailPage`, `TransactionDetailPage`, and `TransferDetailPage`. Verified with comprehensive unit/integration test suite: 145/145 tests passed, TypeScript 0 errors, ESLint 0 warnings, Prettier clean, production build passed.
 - **2026-11-22 — Card-based Transaction Form, Merged Transfer Flow, Source/Destination Mutual Exclusion & Wallet Detail Layout:** Merged wallet transfers directly into the main transaction form (`/app/transactions/new`), expanding transaction types to three: Pengeluaran (Expense), Pemasukan (Income), and Transfer, selectable via interactive visual cards. Replaced wallet dropdowns with `WalletCardSelector` showing provider logo, account number/name, wallet balance, and wallet type icon, with a 5-card maximum limit and expandable "Lainnya" tile with quick search when > 6 wallets. Enforced mutual exclusion between source and destination wallets (disabling the selected source from destination options and vice-versa). Removed the redundant "Transfer money" buttons from both the homepage (`/app`) and the transactions page (`/app/transactions`), and added the interactive `FinancialRecapSection` directly to the transactions page. Reorganized the wallet detail page (`/app/wallets/:id`) to a clean vertical single-column layout so provider cards and forms display comfortably without horizontal truncation. 135/135 tests passed.
 - **2026-11-22 — Visual Card Selectors for Wallet Type and Provider:** Replaced dropdown select menus in wallet create/edit forms with interactive visual card selectors featuring wallet type SVG icons and Indonesian institution brand logos. Preserved accessible hidden select controls for full backward compatibility. 125/125 tests passed.
 - **2026-11-22 — Dashboard & Wallet Card UI Enhancements & Financial Recap:** Added bank and e-wallet card layouts with Indonesian institution brand logos, wallet type icons, adaptive "Account number" / "No. Rekening" labeling for banks and phone/account numbers for e-wallets. Added the Total Accumulated Balance Hero Card with MTD income and expense recap. Added an interactive single-section Financial Recap with Today, Weekly, Monthly, and Custom date ranges categorizing income, expense (including transfer fee), and net cashflow. 125/125 tests passed.

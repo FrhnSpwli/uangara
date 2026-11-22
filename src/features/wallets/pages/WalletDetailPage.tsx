@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router'
 
 import { WalletMetadataFields } from '../components/WalletMetadataFields'
 import { getProviderSelection } from '../config/wallet-presets'
+import { useBalancePrivacy } from '../../preferences/context/useBalancePrivacy'
 import { useWalletService } from '../context/useWalletService'
 import { getWalletErrorMessage } from '../services/wallet-errors'
 import type { WalletDetail, WalletType } from '../types'
@@ -23,6 +24,7 @@ const occurredAtFormatter = new Intl.DateTimeFormat('id-ID', {
 export function WalletDetailPage() {
   const { walletId } = useParams()
   const service = useWalletService()
+  const { isHidden } = useBalancePrivacy()
   const [wallet, setWallet] = useState<WalletDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -303,7 +305,7 @@ export function WalletDetailPage() {
             Calculated balance
           </p>
           <p className="mt-2 text-2xl font-bold">
-            {formatMoney(wallet.balance)}
+            {formatMoney(wallet.balance, { hide: isHidden })}
           </p>
         </div>
       </div>

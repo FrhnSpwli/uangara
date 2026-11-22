@@ -2,6 +2,7 @@ import { type FormEvent, useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 
 import { formatMoney } from '../../../utils/money'
+import { useBalancePrivacy } from '../../preferences/context/useBalancePrivacy'
 import { toLocalDateTimeValue } from '../../transactions/utils/validation'
 import { useWalletService } from '../../wallets/context/useWalletService'
 import { TransferForm } from '../components/TransferForm'
@@ -32,6 +33,7 @@ export function TransferDetailPage() {
   const { transferId } = useParams()
   const transferService = useTransferService()
   const walletService = useWalletService()
+  const { isHidden } = useBalancePrivacy()
   const [transfer, setTransfer] = useState<TransferDetail | null>(null)
   const [wallets, setWallets] = useState<TransferWalletOption[]>([])
   const [values, setValues] = useState<TransferFormValues | null>(null)
@@ -220,13 +222,13 @@ export function TransferDetailPage() {
           <div>
             <dt className="text-sm text-slate-500">Principal</dt>
             <dd className="mt-1 font-semibold">
-              {formatMoney(transfer.amount)}
+              {formatMoney(transfer.amount, { hide: isHidden })}
             </dd>
           </div>
           <div>
             <dt className="text-sm text-slate-500">Admin fee</dt>
             <dd className="mt-1 font-semibold">
-              {formatMoney(transfer.feeAmount)}
+              {formatMoney(transfer.feeAmount, { hide: isHidden })}
             </dd>
           </div>
           <div>
@@ -237,6 +239,7 @@ export function TransferDetailPage() {
                 (
                   BigInt(transfer.amount) + BigInt(transfer.feeAmount)
                 ).toString(),
+                { hide: isHidden },
               )}
             </dd>
           </div>

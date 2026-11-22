@@ -1,5 +1,6 @@
 import { Link } from 'react-router'
 
+import { useBalancePrivacy } from '../../preferences/context/useBalancePrivacy'
 import type { WalletSummary } from '../types'
 import { formatMoney } from '../utils/money'
 import { getWalletTypeLabel } from '../utils/validation'
@@ -69,6 +70,7 @@ function getAccountLabel(type: WalletSummary['type']): string {
 }
 
 export function WalletCard({ wallet }: WalletCardProps) {
+  const { isHidden } = useBalancePrivacy()
   const themeClass = getCardTheme(wallet)
   const isBankOrCard = wallet.type === 'bank' || wallet.type === 'e_money'
   const accountLabel = getAccountLabel(wallet.type)
@@ -148,7 +150,7 @@ export function WalletCard({ wallet }: WalletCardProps) {
           Saldo
         </span>
         <p className="mt-0.5 text-xl font-extrabold tracking-tight text-white sm:text-2xl">
-          {formatMoney(wallet.balance)}
+          {formatMoney(wallet.balance, { hide: isHidden })}
         </p>
       </div>
     </Link>

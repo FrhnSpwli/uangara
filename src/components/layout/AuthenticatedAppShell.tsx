@@ -3,6 +3,7 @@ import { Link, Outlet } from 'react-router'
 
 import { useAuth } from '../../features/auth/context/useAuth'
 import { getAuthErrorMessage } from '../../features/auth/services/auth-errors'
+import { BalancePrivacyToggle } from '../../features/preferences/components/BalancePrivacyToggle'
 
 export function AuthenticatedAppShell() {
   const { signOut } = useAuth()
@@ -64,16 +65,19 @@ export function AuthenticatedAppShell() {
               </div>
             </nav>
           </div>
-          <button
-            className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={pending}
-            onClick={() => {
-              void handleSignOut()
-            }}
-            type="button"
-          >
-            {pending ? 'Signing out…' : 'Sign out'}
-          </button>
+          <div className="flex items-center gap-2">
+            <BalancePrivacyToggle showLabel={false} />
+            <button
+              className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={pending}
+              onClick={() => {
+                void handleSignOut()
+              }}
+              type="button"
+            >
+              {pending ? 'Signing out…' : 'Sign out'}
+            </button>
+          </div>
         </div>
         {error ? (
           <p

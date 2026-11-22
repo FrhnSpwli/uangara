@@ -1,5 +1,6 @@
 import { useId, useMemo, useState } from 'react'
 
+import { useBalancePrivacy } from '../../preferences/context/useBalancePrivacy'
 import type { WalletType } from '../types'
 import { formatMoney } from '../utils/money'
 import { WalletBrandLogo } from './WalletBrandLogo'
@@ -39,6 +40,7 @@ export function WalletCardSelector({
   value,
   wallets,
 }: WalletCardSelectorProps) {
+  const { isHidden } = useBalancePrivacy()
   const generatedId = useId()
   const selectId = providedId || generatedId
   const [expanded, setExpanded] = useState(false)
@@ -185,7 +187,7 @@ export function WalletCardSelector({
 
                   {wallet.balance !== undefined ? (
                     <p className="mt-0.5 text-xs font-bold text-slate-900">
-                      {formatMoney(wallet.balance)}
+                      {formatMoney(wallet.balance, { hide: isHidden })}
                     </p>
                   ) : null}
                 </div>

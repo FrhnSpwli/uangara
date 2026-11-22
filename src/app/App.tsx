@@ -1,5 +1,6 @@
 import { AuthProvider } from '../features/auth/context/AuthProvider'
 import type { AuthService } from '../features/auth/services/auth-service'
+import { BalancePrivacyProvider } from '../features/preferences/context/BalancePrivacyProvider'
 import { TransactionServiceProvider } from '../features/transactions/context/TransactionServiceProvider'
 import type { TransactionService } from '../features/transactions/types'
 import { TransferServiceProvider } from '../features/transfers/context/TransferServiceProvider'
@@ -26,7 +27,9 @@ export function App({
       <WalletServiceProvider service={walletService}>
         <TransactionServiceProvider service={transactionService}>
           <TransferServiceProvider service={transferService}>
-            <AppRouter />
+            <BalancePrivacyProvider>
+              <AppRouter />
+            </BalancePrivacyProvider>
           </TransferServiceProvider>
         </TransactionServiceProvider>
       </WalletServiceProvider>

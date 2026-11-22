@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 
+import { useBalancePrivacy } from '../../preferences/context/useBalancePrivacy'
 import { formatMoney } from '../../../utils/money'
 import { FinancialRecapSection } from '../components/FinancialRecapSection'
 import { useTransactionService } from '../context/useTransactionService'
@@ -12,22 +13,26 @@ const occurredAtFormatter = new Intl.DateTimeFormat('id-ID', {
   timeStyle: 'short',
 })
 
-function displayAmount(transaction: FinancialTransactionSummary) {
+function displayAmount(
+  transaction: FinancialTransactionSummary,
+  isHidden?: boolean,
+) {
   if (transaction.kind === 'transfer') {
     return transaction.feeAmount === '0'
-      ? formatMoney(transaction.amount)
-      : formatMoney(transaction.amount) +
+      ? formatMoney(transaction.amount, { hide: isHidden })
+      : formatMoney(transaction.amount, { hide: isHidden }) +
           ' + ' +
-          formatMoney(transaction.feeAmount) +
+          formatMoney(transaction.feeAmount, { hide: isHidden }) +
           ' fee'
   }
 
   const prefix = transaction.kind === 'income' ? '+' : '−'
-  return `${prefix}${formatMoney(transaction.amount)}`
+  return `${prefix}${formatMoney(transaction.amount, { hide: isHidden })}`
 }
 
 export function TransactionListPage() {
   const service = useTransactionService()
+  const { isHidden } = useBalancePrivacy()
   const [mode, setMode] = useState<TransactionListMode>('active')
   const [transactions, setTransactions] = useState<
     FinancialTransactionSummary[]
@@ -198,7 +203,7 @@ export function TransactionListPage() {
                         : 'text-slate-700'
                   }`}
                 >
-                  {displayAmount(transaction)}
+                  {displayAmount(transaction, isHidden)}
                 </p>
               </Link>
             </li>

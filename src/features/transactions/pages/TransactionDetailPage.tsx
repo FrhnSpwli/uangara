@@ -2,6 +2,7 @@ import { type FormEvent, useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 
 import { formatMoney } from '../../../utils/money'
+import { useBalancePrivacy } from '../../preferences/context/useBalancePrivacy'
 import { useWalletService } from '../../wallets/context/useWalletService'
 import { TransactionForm } from '../components/TransactionForm'
 import { useTransactionService } from '../context/useTransactionService'
@@ -38,6 +39,7 @@ export function TransactionDetailPage() {
   const { transactionId } = useParams()
   const transactionService = useTransactionService()
   const walletService = useWalletService()
+  const { isHidden } = useBalancePrivacy()
   const [transaction, setTransaction] = useState<TransactionDetail | null>(null)
   const [wallets, setWallets] = useState<TransactionWalletOption[]>([])
   const [values, setValues] = useState<TransactionFormValues | null>(null)
@@ -273,7 +275,7 @@ export function TransactionDetailPage() {
           }`}
         >
           {transaction.kind === 'income' ? '+' : '−'}
-          {formatMoney(transaction.amount)}
+          {formatMoney(transaction.amount, { hide: isHidden })}
         </p>
       </div>
 
