@@ -163,6 +163,34 @@ export function createSupabaseTransactionService(
       return data.map(toFinancialTransactionSummary)
     },
 
+    async listTransactionsByDateRange(startDate?: string, endDate?: string) {
+      let query = client
+        .from('transaction_feed')
+        .select(
+          'transaction_id,user_id,kind,wallet_id,wallet_name,wallet_archived_at,source_wallet_id,source_wallet_name,source_wallet_archived_at,destination_wallet_id,destination_wallet_name,destination_wallet_archived_at,description,notes,amount,fee_amount,occurred_at,deleted_at,created_at,updated_at',
+        )
+        .is('deleted_at', null)
+        .order('occurred_at', { ascending: false })
+        .order('created_at', { ascending: false })
+        .order('transaction_id', { ascending: false })
+
+      if (startDate) {
+        query = query.gte('occurred_at', startDate)
+      }
+
+      if (endDate) {
+        query = query.lte('occurred_at', endDate)
+      }
+
+      const { data, error } = await query
+
+      if (error) {
+        throw requestError('load transactions for the selected period')
+      }
+
+      return data.map(toFinancialTransactionSummary)
+    },
+
     async getTransaction(transactionId: string) {
       const { data, error } = await client
         .from('income_expense_transactions')

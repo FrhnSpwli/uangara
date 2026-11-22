@@ -70,6 +70,9 @@ export function createTransactionServiceStub() {
     listTransactions: vi.fn<TransactionService['listTransactions']>(() =>
       Promise.resolve<FinancialTransactionSummary[]>([]),
     ),
+    listTransactionsByDateRange: vi.fn<
+      TransactionService['listTransactionsByDateRange']
+    >(() => Promise.resolve<FinancialTransactionSummary[]>([])),
     restoreTransaction: vi.fn(() => Promise.resolve()),
     softDeleteTransaction: vi.fn(() => Promise.resolve()),
     updateTransaction: vi.fn(() => Promise.resolve()),

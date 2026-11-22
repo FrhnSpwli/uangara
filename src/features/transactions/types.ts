@@ -63,6 +63,10 @@ export interface TransactionService {
   listTransactions: (
     mode: TransactionListMode,
   ) => Promise<FinancialTransactionSummary[]>
+  listTransactionsByDateRange: (
+    startDate?: string,
+    endDate?: string,
+  ) => Promise<FinancialTransactionSummary[]>
   restoreTransaction: (transactionId: string) => Promise<void>
   softDeleteTransaction: (transactionId: string) => Promise<void>
   updateTransaction: (
