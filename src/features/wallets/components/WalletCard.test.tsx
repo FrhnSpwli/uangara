@@ -1,6 +1,6 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createWalletSummary } from '../../../test/wallets'
 import { BalancePrivacyProvider } from '../../preferences/context/BalancePrivacyProvider'
@@ -109,5 +109,35 @@ describe('WalletCard', () => {
 
     expect(screen.getByText('Rp ••••••')).toBeInTheDocument()
     expect(screen.queryByText(/15\.000\.000/)).not.toBeInTheDocument()
+  })
+
+  it('copies account number and provider to clipboard on copy click', () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.assign(navigator, {
+      clipboard: { writeText },
+    })
+
+    const wallet = createWalletSummary({
+      institution: 'Bank Jago',
+      name: '109254920681',
+      type: 'bank',
+    })
+
+    render(
+      <MemoryRouter>
+        <WalletCard wallet={wallet} />
+      </MemoryRouter>,
+    )
+
+    const copyBtn = screen.getByRole('button', {
+      name: /salin nomor Bank Jago/i,
+    })
+    expect(copyBtn).toBeInTheDocument()
+
+    fireEvent.click(copyBtn)
+
+    expect(writeText).toHaveBeenCalledWith(
+      '🏦 Bank Jago\nNo. Rekening: 109254920681',
+    )
   })
 })

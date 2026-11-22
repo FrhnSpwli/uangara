@@ -79,18 +79,47 @@ export function TransactionDetailPage() {
         return
       }
 
-      const options = activeWallets.map((wallet) => ({
-        archivedAt: wallet.archivedAt,
-        id: wallet.id,
-        name: wallet.name,
-      }))
+      const options: TransactionWalletOption[] = activeWallets.map(
+        (wallet) => ({
+          archivedAt: wallet.archivedAt,
+          balance: wallet.balance,
+          id: wallet.id,
+          institution: wallet.institution,
+          name: wallet.name,
+          type: wallet.type,
+        }),
+      )
 
       if (!options.some((wallet) => wallet.id === loadedTransaction.walletId)) {
-        options.push({
-          archivedAt: loadedTransaction.walletArchivedAt,
-          id: loadedTransaction.walletId,
-          name: loadedTransaction.walletName,
-        })
+        try {
+          const historicalWallet = await walletService.getWallet(
+            loadedTransaction.walletId,
+          )
+          if (historicalWallet) {
+            options.push({
+              archivedAt:
+                loadedTransaction.walletArchivedAt ??
+                historicalWallet.archivedAt,
+              balance: historicalWallet.balance,
+              id: historicalWallet.id,
+              institution: historicalWallet.institution,
+              name: historicalWallet.name,
+              type: historicalWallet.type,
+            })
+          } else {
+            options.push({
+              archivedAt: loadedTransaction.walletArchivedAt,
+              id: loadedTransaction.walletId,
+              name: loadedTransaction.walletName,
+            })
+          }
+        } catch {
+          options.push({
+            archivedAt: loadedTransaction.walletArchivedAt,
+            id: loadedTransaction.walletId,
+            name: loadedTransaction.walletName,
+          })
+        }
       }
 
       setNotFound(false)

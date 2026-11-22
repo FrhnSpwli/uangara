@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 
 import { AccumulatedBalanceCard } from '../components/AccumulatedBalanceCard'
+import { CopyAllWalletsButton } from '../components/CopyAllWalletsButton'
 import { WalletCard } from '../components/WalletCard'
 import { useWalletService } from '../context/useWalletService'
 import { getWalletErrorMessage } from '../services/wallet-errors'
@@ -67,12 +68,20 @@ export function WalletListPage() {
             Each balance is calculated from its active ledger movements.
           </p>
         </div>
-        <Link
-          className="bg-brand-700 hover:bg-brand-800 inline-flex min-h-11 items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-white"
-          to="/app/wallets/new"
-        >
-          Add wallet
-        </Link>
+        <div className="flex flex-wrap items-center gap-2.5">
+          {!loading && wallets.length > 0 ? (
+            <CopyAllWalletsButton
+              className="min-h-11 px-3.5 py-2.5 text-sm"
+              wallets={wallets}
+            />
+          ) : null}
+          <Link
+            className="bg-brand-700 hover:bg-brand-800 inline-flex min-h-11 items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-white"
+            to="/app/wallets/new"
+          >
+            Add wallet
+          </Link>
+        </div>
       </div>
 
       <div className="mt-8">

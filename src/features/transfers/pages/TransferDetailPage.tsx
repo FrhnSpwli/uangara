@@ -70,8 +70,11 @@ export function TransferDetailPage() {
 
       const options: TransferWalletOption[] = activeWallets.map((wallet) => ({
         archivedAt: wallet.archivedAt,
+        balance: wallet.balance,
         id: wallet.id,
+        institution: wallet.institution,
         name: wallet.name,
+        type: wallet.type,
       }))
 
       for (const historical of [
@@ -87,7 +90,26 @@ export function TransferDetailPage() {
         },
       ]) {
         if (!options.some((wallet) => wallet.id === historical.id)) {
-          options.push(historical)
+          try {
+            const historicalWallet = await walletService.getWallet(
+              historical.id,
+            )
+            if (historicalWallet) {
+              options.push({
+                archivedAt:
+                  historical.archivedAt ?? historicalWallet.archivedAt,
+                balance: historicalWallet.balance,
+                id: historicalWallet.id,
+                institution: historicalWallet.institution,
+                name: historicalWallet.name,
+                type: historicalWallet.type,
+              })
+            } else {
+              options.push(historical)
+            }
+          } catch {
+            options.push(historical)
+          }
         }
       }
 
@@ -182,10 +204,10 @@ export function TransferDetailPage() {
           It may not exist or may belong to another user.
         </p>
         <Link
-          className="mt-5 inline-flex font-semibold text-teal-700"
+          className="mt-5 inline-flex text-sm font-medium text-emerald-800 transition hover:text-emerald-950 focus:underline"
           to="/app/transactions"
         >
-          Back to transactions
+          ← Back to transactions
         </Link>
       </section>
     )
@@ -194,10 +216,10 @@ export function TransferDetailPage() {
   return (
     <section className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
       <Link
-        className="text-sm font-semibold text-teal-700"
+        className="text-sm font-medium text-emerald-800 transition hover:text-emerald-950 focus:underline"
         to="/app/transactions"
       >
-        Back to transactions
+        ← Back to transactions
       </Link>
       <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
         <div className="flex flex-wrap items-start justify-between gap-3">
