@@ -5,11 +5,11 @@
 ## Handoff metadata
 
 - **Last updated:** 2026-11-22
-- **Current working branch:** `feat/recap-donut-chart-and-wallet-providers`
-- **Accepted `main` baseline:** `706c160`
+- **Current working branch:** `feat/wallet-type-priority-order`
+- **Accepted `main` baseline:** `22d9577`
 - **Phase 5 planning commit:** `8fa5c4132dcf582cad3ab590a91680b630e5ba0c`
 - **Phase 5 implementation commit:** `5261e3163572d0003016288b94d8de8f9ccca24a`
-- **Current phase state:** Privacy mode (Hide Balance), Transaction Categorization (Stage 2), Category Donut Chart on Financial Recap, and Wallet Provider Display on Transaction Cards implemented and verified across migrations, remote Supabase, services, components, pages, and test suites
+- **Current phase state:** Wallet Type Priority Ordering (Bank, E-Wallet, E-Money, Cash, Other) implemented and verified across wallet service, utilities, and views
 - **Next permitted action:** review and merge pull request into main or await next user directive
 - **Not authorized:** merging this follow-up without the user's review
 - **Production Auth action required:** set the Supabase Site URL to `https://uangara.vercel.app` and allow-list `https://uangara.vercel.app/auth/sign-in?confirmed=true`, then request a new confirmation email
@@ -59,6 +59,7 @@ The detailed Phase 5 contract and implementation record are in [`docs/phases/PHA
 - Card-based transaction creation flow with 3 unified transaction kinds: Pengeluaran (Expense), Pemasukan (Income), and Transfer, with transfer flow merged directly inside the main transaction form.
 - Visual wallet card selector (`WalletCardSelector`) displaying provider logo, account number/name, wallet balance, and type icon, limited to 5 cards with an expandable "Lainnya" tile and search filter when > 6 wallets. Consistent rich card display across create transaction, edit transaction, create transfer, and edit transfer pages.
 - Adaptive wallet provider and institution display on transaction cards in `TransactionListPage`, `TransactionDetailPage`, and `TransferDetailPage`, clearly presenting the provider alongside the account number (e.g. `ShopeePay (081241252656)`, and for transfers: `Bank Jago (109254920681) → ShopeePay (081241252656)`).
+- Deterministic wallet type priority ordering: wallets loaded across the application (`WalletService.listWallets`, `AuthenticatedHomePage`, `WalletListPage`, `WalletCardSelector`, `CopyAllWalletsButton`) are prioritized in order: Bank first, E-Wallet second, E-Money third, Cash fourth, and Other fifth, breaking ties with newest `createdAt` first.
 - Unified navigation link styling ("← Back to transactions") across transaction and transfer detail and creation views.
 - Wallet clipboard sharing: integrated quick copy button on each `WalletCard` and `WalletDetailPage` to copy account number and provider with instant visual feedback, and a "Salin Semua" button (`CopyAllWalletsButton`) on the homepage and wallet list page to copy all active wallets formatted catchily and neatly for messaging apps.
 - Global Privacy Mode (Hide Balance) with instant toggle button (`BalancePrivacyToggle`) in the header navbar and Accumulated Balance Hero Card, masking financial numbers (`Rp ••••••` / `+Rp ••••••` / `-Rp ••••••`) across the dashboard, wallet cards, card selector, financial recap section, transaction list feed, and wallet/transaction detail pages, with persistent preference storage (`localStorage`).
@@ -149,7 +150,7 @@ The latest recorded verification passed:
 - TypeScript (`tsc -b --pretty false`): passed with 0 errors.
 - ESLint (`eslint . --max-warnings 0`): passed with 0 errors and 0 warnings.
 - Prettier: formatted and verified across all changed and added files.
-- Frontend/static test suite: 176/176 passed across 31 test files with Vitest.
+- Frontend/static test suite: 185/185 passed across 33 test files with Vitest.
 - Supabase remote migration & lint: applied up through `20260905020000`, remote database lint passed with 0 errors.
 - Production build (`vite build`): passed; static assets, manifest, and service worker generated.
 - `git diff --check`: passed with zero whitespace or line ending issues.
@@ -236,6 +237,7 @@ Keep the recent-update list concise—retain roughly the latest ten material ent
 
 ## Recent handoff updates
 
+- **2026-11-22 — Wallet Type Priority Ordering (Bank, E-Wallet, E-Money, Cash, Other):** Added deterministic wallet type sorting utility `sortWalletsByType` and integrated it into `WalletService.listWallets`. Prioritizes wallets across the dashboard ('Dompet Saya'), wallet list page, card selector, and clipboard sharing in the exact order: Bank, E-Wallet, E-Money, Cash, Other, preserving newest-first creation ordering within each category. Added unit tests in `sorting.test.ts` and `wallet-service.test.ts`. Verified with 185/185 tests passing across 33 test files, TypeScript 0 errors, ESLint 0 warnings, and production build succeeded.
 - **2026-11-22 — Category Donut Chart on Financial Recap & Wallet Provider Display on Transaction Cards:** Added pure lightweight SVG `CategoryDonutChart` into `FinancialRecapSection` with sub-tab toggling for Pengeluaran (Expense, factoring transfer fees) and Pemasukan (Income), visual progress bars, percentage breakdown, and privacy-mode masked center totals. Added remote database migration `20260905020000_add_provider_to_transaction_views.sql` enhancing `transaction_feed` and `income_expense_transactions` views with source and destination wallet institution and type. Updated transaction cards in `TransactionListPage`, `TransactionDetailPage`, and `TransferDetailPage` to display wallet institution names alongside account numbers (`ShopeePay (081241252656)`, `Bank Jago (109254920681) → ShopeePay (081241252656)`). Verified with 176/176 tests passing across 31 test files, TypeScript 0 errors, ESLint 0 warnings, Prettier clean, remote Supabase migration pushed and linted with 0 errors, and production build succeeded.
 - **2026-11-22 — Wallet Edit View Consistency, Back Navigation Alignment & Wallet Copy Features:** Resolved wallet card option mapping in `TransactionDetailPage` and `TransferDetailPage` so wallet selection displays full institution brand logos, provider names, and balances matching `CreateTransactionPage`. Standardized transfer back-navigation link to `← Back to transactions` with matching emerald typography. Added single wallet account number and provider copy button on `WalletCard` and `WalletDetailPage`, and added `CopyAllWalletsButton` on `AuthenticatedHomePage` and `WalletListPage` to copy all accounts with clean emojis, labels, and catchy formatting. Verified with 171/171 tests passing across 30 test files, TypeScript 0 errors, ESLint 0 warnings, and production build succeeded.
 - **2026-11-22 — Stage 2: Transaction Categorization Implementation:** Added transaction category support across schema, remote Supabase, RPCs, service layer, and UI. Created `categories` table with system seeds (8 Expense, 6 Income, 5 Transfer purposes), RLS policies, and added `category_id` to `transactions`. Updated atomic RPCs (`create_income_expense_transaction`, `update_income_expense_transaction`, `create_transfer`, `update_transfer`) to validate category ownership, kind compatibility, and active status. Updated views (`income_expense_transactions`, `transaction_feed`). Added `CategoryService`, `CategoryServiceProvider`, `CategoryCardSelector`, `CategoryBadge`, and `CategoryIcon`. Integrated category selector into unified `TransactionForm` and `TransferForm`, resetting category selection automatically when switching kinds, and integrated badges into transaction and transfer feed/detail pages. Verified with 159/159 tests passing, TypeScript 0 errors, ESLint 0 warnings, Prettier clean, remote Supabase migration pushed and linted with 0 errors, and production build succeeded.
